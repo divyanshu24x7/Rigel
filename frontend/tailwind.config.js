@@ -9,6 +9,10 @@ export default {
       fontFamily: {
         sans: ['Roboto','sans-serif'],
       },
+      colors: {
+        rigelBlack: '#131200',
+        rigelSalmon: '#E9806E',
+      },
     },
   },
   plugins: [],
