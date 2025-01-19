@@ -1,10 +1,9 @@
 import React from 'react'
 import { SideData } from './SideData'
-import logo from '../assets/logo.png'
 
 const Sidebar = () => {
   return (
-    <div className='h-full w-[15%] bg-rigelBlack relative'>
+    <div className='h-full w-[20%] md:w-[15%] bg-rigelBlack relative'>
       <div className="absolute right-0 top-0 h-full w-[1px] bg-gray-500 opacity-30"></div>
       <ul className='absolute right-0'>
         {
