@@ -10,8 +10,9 @@ export default {
         sans: ['Roboto','sans-serif'],
       },
       colors: {
-        rigelBlack: '#131200',
+        rigelBlack: '#000000',
         rigelSalmon: '#E9806E',
+        rigelIcon: '#3e4144'
       },
     },
   },
