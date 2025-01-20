@@ -22,12 +22,13 @@ const Login = () => {
             if (response.ok) {
                 // Login successful
                 //alert('Login successful!');
-                localStorage.setItem('token', data.token)
+                localStorage.setItem('token', data.accessToken)
                 localStorage.setItem('userId', data.userId)
+                console.log(data.accessToken)
+                console.log(data.userId)
+                console.log("hello")
                 // Navigate to a new page, e.g., dashboard or home
-                navigate('/Home');
-                // Reload the page
-                window.location.reload();
+                navigate('/');
 
             } else {
                 // Handle login failure (e.g., show error message)
@@ -41,7 +42,7 @@ const Login = () => {
     return (
         <div className='container mx-auto items-center flex flex-col'>
             <h1 className='text-white text-4xl p-12'>Welcome back</h1>
-            <form className='flex flex-col w-full items-center' /*onSubmit={handleLogin}*/> {/* Form submission */}
+            <form className='flex flex-col w-full items-center' onSubmit={handleLogin}> {/* Form submission */}
                 <input
                     type='text'
                     placeholder='Email'

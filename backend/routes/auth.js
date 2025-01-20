@@ -26,8 +26,9 @@ router.post("/SignUp", async (req, res) => {
 })
 
 router.post("/login",async (req,res)=>{
+    const { username, password } = req.body;
     try{
-        const user = await User.findOne(req.body.username)
+        const user = await User.findOne({username})
         if(!user){
             return res.status(400).json({message:"user does not exist"})
         }
@@ -37,29 +38,14 @@ router.post("/login",async (req,res)=>{
             return res.status(400).json({message:"incorrect password"})
         }
 
-        const accessToken = jwt.sign({userId: user._id},process.env.ACCESS_TOKEN_SECRET)
-        res.status(200).json({message:"login succesful",accessToken})
+        const accessToken = jwt.sign({userId: user._id},process.env.ACCESS_TOKEN_SECRET,{expiresIn: "15m"})
+        console.log(accessToken)
+        res.status(200).json({message:"login succesful",accessToken,userId:user._id})
     }catch(err){
         console.log(err)
-        res.status(500).jsom({message:"error during login"})
+        res.status(500).json({message:"error during login"})
     }
 })
 
-function authenticateToken(req,res,next){
-    const authHeader = req.headers["authorization"]
-    const token = authHeader && authHeader.split(" ")[1]
-
-    if(token==null){
-        return res.status(500).json({message:"No token found"})
-    }
-
-    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,user)=>{
-        if(err){
-            return res.sendStatus(403)
-        }
-        req.user = user
-        next()
-    })
-}
 
 export default router
