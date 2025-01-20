@@ -38,7 +38,7 @@ router.post("/login",async (req,res)=>{
             return res.status(400).json({message:"incorrect password"})
         }
 
-        const accessToken = jwt.sign({userId: user._id},process.env.ACCESS_TOKEN_SECRET,{expiresIn: "15m"})
+        const accessToken = jwt.sign({userId: user._id},process.env.ACCESS_TOKEN_SECRET,{expiresIn: "1h"})
         console.log(accessToken)
         res.status(200).json({message:"login succesful",accessToken,userId:user._id})
     }catch(err){

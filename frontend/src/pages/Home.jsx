@@ -1,10 +1,21 @@
-import React from 'react'
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SideBar from '../components/Sidebar';
 import Header from '../components/Header';
 import Rightbar from '../components/Rightbar';
 import Compose from '../components/Compose';
 import CardSlider from '../components/CardSlider';
+
 const Home = () => {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            navigate('/auth/login');
+        }
+    }, [navigate]);
+
     const cards = [
         "This is the first card content.",
         "Here's some text for the second card.",
@@ -12,6 +23,7 @@ const Home = () => {
         "Another example for the fourth card.",
         "Finally, this is the fifth card."
     ];
+
     return (
         <div className="h-screen w-screen flex">
             <SideBar />
@@ -26,7 +38,7 @@ const Home = () => {
                 <Rightbar />
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Home
+export default Home;

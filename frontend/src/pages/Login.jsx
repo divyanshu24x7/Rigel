@@ -22,7 +22,7 @@ const Login = () => {
             if (response.ok) {
                 // Login successful
                 //alert('Login successful!');
-                localStorage.setItem('token', data.accessToken)
+                localStorage.setItem('accessToken', data.accessToken)
                 localStorage.setItem('userId', data.userId)
                 console.log(data.accessToken)
                 console.log(data.userId)

@@ -45,7 +45,8 @@ function authenticateToken(req, res, next) {
 app.post("/messages", authenticateToken, async (req, res) => {
     try {
         const { content, tags } = req.body;
-
+        console.log(req.user.userId)
+        const authorId = req.user.userId;
         // Validate input
         if (!content || !tags || !Array.isArray(tags) || tags.length === 0) {
             return res.status(400).json({ error: "Invalid input. Message content and at least one tag are required." });
@@ -56,14 +57,14 @@ app.post("/messages", authenticateToken, async (req, res) => {
             content,
             tags,
             createdAt: new Date(),
-            userId: req.user.id, // Assuming `authenticateToken` sets `req.user`
+            authorId: authorId, // Assuming `authenticateToken` sets `req.user`
         });
 
         // Create a new user-specific message document
         const userMessage = new UserMessage({
             content,
             tags,
-            authorId: req.user.id,
+            authorId: authorId,
             createdAt: new Date(),
             status: 'in pool',
             isInPool: true,
