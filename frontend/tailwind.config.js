@@ -12,7 +12,8 @@ export default {
       colors: {
         rigelBlack: '#000000',
         rigelSalmon: '#78BC61',
-        rigelIcon: '#3e4144'
+        rigelIcon: '#3e4144',
+        lightSalmon: '#91CC7E'
       },
     },
   },

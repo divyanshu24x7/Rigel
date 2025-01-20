@@ -78,7 +78,7 @@ const Compose = () => {
                     className="text-xl text-gray-700 bg-rigelBlack outline-none w-1/3 mr-4 grow"
                 />
                 <button
-                    className="text-gray-700 bg-rigelSalmon w-14 h-8 flex items-center justify-center border rounded-full"
+                    className="text-gray-700 bg-rigelSalmon w-14 h-8 flex items-center justify-center border rounded-full hover:bg-lightSalmon"
                     onClick={handlePost}
                 >
                     Post

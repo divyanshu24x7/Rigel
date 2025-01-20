@@ -23,7 +23,7 @@ const CardSlider = ({ cards }) => {
           Next
         </button>
         <button
-          className="bg-rigelSalmon text-gray-700 px-4 py-2 rounded-lg hover:bg-blue-600"
+          className="bg-rigelSalmon text-gray-700 px-4 py-2 rounded-lg hover:bg-lightSalmon"
         >
           Reply
         </button>
