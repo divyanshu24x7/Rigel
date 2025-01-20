@@ -5,7 +5,7 @@ import cors from "cors"
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
 import Message from './models/Messages.js'; // Import your Message model
-import UserMessage from './models/UserMessage.js';
+// import UserMessage from './models/UserMessage.js';
 const app = express()
 dotenv.config()
 const PORT = process.env.PORT || 5000;
@@ -60,23 +60,24 @@ app.post("/messages", authenticateToken, async (req, res) => {
             authorId: authorId, // Assuming `authenticateToken` sets `req.user`
         });
 
-        // Create a new user-specific message document
-        const userMessage = new UserMessage({
-            content,
-            tags,
-            authorId: authorId,
-            createdAt: new Date(),
-            status: 'in pool',
-            isInPool: true,
-        });
+        // // Create a new user-specific message document
+        // const userMessage = new UserMessage({
+        //     content,
+        //     tags,
+        //     authorId: authorId,
+        //     createdAt: new Date(),
+        //     status: 'in pool',
+        //     isInPool: true,
+        // });
 
         // Save both documents
-        await Promise.all([poolMessage.save(), userMessage.save()]);
+        // await Promise.all([poolMessage.save(), userMessage.save()]);
+        await Promise.all([poolMessage.save()]);
 
         res.status(201).json({
             message: "Message stored successfully",
             poolData: poolMessage,
-            userData: userMessage,
+            // userData: userMessage,
         });
     } catch (error) {
         console.error("Error storing message:", error);
