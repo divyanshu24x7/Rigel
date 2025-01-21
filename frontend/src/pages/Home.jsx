@@ -1,13 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SideBar from '../components/Sidebar';
 import Header from '../components/Header';
 import Rightbar from '../components/Rightbar';
 import Compose from '../components/Compose';
 import CardSlider from '../components/CardSlider';
+import axios from 'axios';
 
 const Home = () => {
     const navigate = useNavigate();
+    const [messages, setMessages] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
@@ -16,13 +20,37 @@ const Home = () => {
         }
     }, [navigate]);
 
-    const cards = [
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-        "Here's some text for the second card.",
-        "The third card contains this message.",
-        "Another example for the fourth card.",
-        "Finally, this is the fifth card."
-    ];
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const res = await axios.get(`http://localhost:5000/messages?page=${page}&limit=10`);
+                if (res.data.length === 0) {
+                    setHasMore(false); // No more messages to fetch
+                } else {
+                    setMessages((prev) => [...prev, ...res.data.map((msg) => msg.content)]);
+                }
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+            }
+        };
+
+        fetchMessages();
+    }, [page]);
+
+    const handleScroll = () => {
+        if (
+            window.innerHeight + document.documentElement.scrollTop >=
+            document.documentElement.offsetHeight - 10 &&
+            hasMore
+        ) {
+            setPage((prev) => prev + 1); // Load next page
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [hasMore]);
 
     return (
         <div className="h-screen w-screen flex">
@@ -31,7 +59,7 @@ const Home = () => {
                 <Header />
                 <Compose />
                 <div className="mt-8 mx-auto">
-                    <CardSlider cards={cards} />
+                    <CardSlider cards={messages} />
                 </div>
             </section>
             <div className="hidden md:flex md:w-1/3">
