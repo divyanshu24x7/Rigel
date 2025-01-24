@@ -1,80 +1,94 @@
-import React from 'react'
+import React,{useState} from 'react'
 import profilepic from '../assets/profile-pic.png';
 import SearchIcon from '@mui/icons-material/Search';
 import CreateIcon from '@mui/icons-material/Create';
 const Right = () => {
+
+    const [activeMenu,setActiveMenu] = useState('Primary')
+    const handleMenuClick = (menu)=>{
+        setActiveMenu(menu)
+    }
     return (
-        <div class="right">
-            <div class="messages">
-                <div class="heading">
+        <div className="right">
+            <div className="messages">
+                <div className="heading">
                     <h4>Messages</h4>
                     <CreateIcon />
                 </div>
-                <div class="search-bar">
+                <div className="search-bar">
                     <SearchIcon />
                     <input type="search" placeholder="Search messages" id="message-search" />
                 </div>
 
-                <div class="category">
-                    <h6 class="active">Primary</h6>
-                    <h6>General</h6>
-                    <h6 class="message-requests">Requests (7)</h6>
+                <div className="category">
+                    <h6 className={`cursor-pointer ${activeMenu==='Primary'?'active':''}`}
+                    onClick={()=>handleMenuClick('Primary')}
+                    >
+                        Primary</h6>
+                    <h6 className={`cursor-pointer ${activeMenu==='General'?'active':''}`}
+                    onClick={()=>handleMenuClick('General')}
+                    >
+                        General</h6>
+                    <h6 className={`cursor-pointer ${activeMenu==='Requests'?'active':''}`}
+                    onClick={()=>handleMenuClick('Requests')}
+                    >
+                        Requests (7)</h6>
                 </div>
-                <div class="message">
-                    <div class="profile-photo">
+                <div className="message">
+                    <div className="profile-photo">
                         <img src={profilepic} />
                     </div>
-                    <div class="message-body">
+                    <div className="message-body">
                         <h5>Cat1</h5>
-                        <p class="text-muted">Just woke up bruh</p>
+                        <p className="text-muted">Just woke up bruh</p>
                     </div>
                 </div>
-                <div class="message">
-                    <div class="profile-photo">
+                <div className="message">
+                    <div className="profile-photo">
                         <img src={profilepic} />
                     </div>
-                    <div class="message-body">
+                    <div className="message-body">
                         <h5>Cat2</h5>
-                        <p class="text-bold">2 new messages</p>
+                        <p className="text-bold">2 new messages</p>
                     </div>
                 </div>
-                <div class="message">
-                    <div class="profile-photo">
+                <div className="message">
+                    <div className="profile-photo">
                         <img src={profilepic} />
-                        <div class="active"></div>
+                        <div className="active"></div>
                     </div>
-                    <div class="message-body">
+                    <div className="message-body">
                         <h5>Cat3</h5>
-                        <p class="text-muted">lol u right</p>
+                        <p className="text-muted">lol u right</p>
                     </div>
                 </div>
-                <div class="message">
-                    <div class="profile-photo">
+                <div className="message">
+                    <div className="profile-photo">
                         <img src={profilepic} />
                     </div>
-                    <div class="message-body">
+                    <div className="message-body">
                         <h5>Cat4</h5>
-                        <p class="text-muted">Birtday Tomorrow</p>
+                        <p className="text-muted">Birtday Tomorrow</p>
                     </div>
                 </div>
-                <div class="message">
-                    <div class="profile-photo">
+                <div className="message">
+                    <div className="profile-photo">
                         <img src={profilepic} />
-                        <div class="active"></div>
+                        <div className="active"></div>
                     </div>
-                    <div class="message-body">
+                    <div className="message-body">
                         <h5>Cat5</h5>
-                        <p class="text-bold">5 new messages</p>
+                        <p className="text-bold">5 new messages</p>
                     </div>
                 </div>
 
-                <div class="message">
-                    <div class="profile-photo">
+                <div className="message">
+                    <div className="profile-photo">
                         <img src={profilepic} />
                     </div>
-                    <div class="message-body">
+                    <div className="message-body">
                         <h5>Cat6</h5>
-                        <p class="text-muted">haha got that!</p>
+                        <p className="text-muted">haha got that!</p>
                     </div>
                 </div>
             </div>
