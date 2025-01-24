@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import profilepic from '../assets/profile-pic.png';
 
 const Middle = () => {
+    const [inputText, setInputText] = useState('')
     const handleInput = (event) => {
-        event.target.style.height = 'auto'; // Reset height to calculate new height
-        event.target.style.height = `${event.target.scrollHeight}px`; // Set height based on content
+        const maxLength = 500
+        const value = event.target.value
+        if (value.length <= maxLength) {
+            setInputText(value)
+            event.target.style.height = 'auto'; // Reset height to calculate new height
+            event.target.style.height = `${event.target.scrollHeight}px`; // Set height based on content
+        }
+
     };
-    
+
+    const remainingChars = 500 - inputText.length
+
     return (
         <div className="middle">
             <form action="" className="create-post">
@@ -20,9 +29,20 @@ const Middle = () => {
                     id="create-post"
                     rows="1"
                     style={{ resize: 'none', overflow: 'hidden' }}
-                    onInput={(event)=>{handleInput(event)}}
+                    value={inputText}
+                    onInput={(event) => { handleInput(event) }}
                 />
-                <input type="submit" value="Post" className="btn btn-primary" />
+                <div className='flex flex-col items-center justify-center'>
+                    <input type="submit" value="Post" className="btn btn-primary" />
+                    <small
+                        className={`block mt-1 text-sm ${remainingChars <= 50
+                            ? 'text-red-500' // Red color for <50 characters left
+                            : 'text-gray-500' // Gray color otherwise
+                            }`}
+                    >
+                        {remainingChars} chars left
+                    </small>
+                </div>
             </form>
             <div className="feeds">
                 <div className="feed">
