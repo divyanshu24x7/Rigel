@@ -240,7 +240,7 @@ main .container .left .profile {
     border-radius: var(--border-radius);
 }
 
-.middle .create-post input[type="text"] {
+.middle .create-post textarea {
     width: 100%;
     justify-self: start;
     padding-left: 1rem;
