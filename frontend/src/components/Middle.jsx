@@ -17,9 +17,38 @@ const Middle = () => {
 
     const remainingChars = 500 - inputText.length
 
+    const handlePost = async(event) => {
+        event.preventDefault();
+        console.log("handle input")
+        const token = localStorage.getItem('accessToken')
+        try {
+            const response = await fetch('http://localhost:5000/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // This tells the server to expect JSON data
+                    'authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ content: inputText, tags: ["test tag"] }),
+            })
+
+            const data = await response.json()
+            if (response.ok) {
+                console.log(data)
+                setInputText('')
+            }
+            else {
+                console.log(data.message)
+            }
+        }catch(error){
+            console.error(error)
+        }
+
+
+    }
+
     return (
         <div className="middle">
-            <form action="" className="create-post">
+            <form action="" className="create-post" onSubmit={handlePost}>
                 <div className="profile-photo">
                     <img src={profilepic} />
                 </div>

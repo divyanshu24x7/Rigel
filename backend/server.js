@@ -72,6 +72,8 @@ app.post('/messages', authenticateToken, async (req, res) => {
     try {
         const { content, tags } = req.body;
         const authorId = req.user.userId;
+        console.log(content)
+        console.log(tags)
 
         // Validate input
         if (!content || !tags || !Array.isArray(tags) || tags.length === 0) {
