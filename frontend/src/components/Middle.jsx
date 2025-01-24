@@ -3,82 +3,130 @@ import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlin
 import profilepic from '../assets/profile-pic.png';
 
 const Middle = () => {
-    const [inputText, setInputText] = useState('')
+    const [inputText, setInputText] = useState('');
+    const [tagInput, setTagInput] = useState('');
+    const [tags, setTags] = useState([]);
+
     const handleInput = (event) => {
-        const maxLength = 500
-        const value = event.target.value
+        const maxLength = 500;
+        const value = event.target.value;
         if (value.length <= maxLength) {
-            setInputText(value)
+            setInputText(value);
             event.target.style.height = 'auto'; // Reset height to calculate new height
             event.target.style.height = `${event.target.scrollHeight}px`; // Set height based on content
         }
-
     };
 
-    const remainingChars = 500 - inputText.length
+    const handleTagInput = (event) => {
+        setTagInput(event.target.value);
+    };
 
-    const handlePost = async(event) => {
+    const handleTagKeyDown = (event) => {
+        if (event.key === ',' || event.key === 'Enter') {
+            event.preventDefault();
+            const tag = tagInput.trim();
+            if (tag && !tags.includes(tag)) {
+                setTags([...tags, tag]);
+                setTagInput('');
+            }
+        }
+    };
+
+    const handleTagRemove = (index) => {
+        setTags(tags.filter((_, i) => i !== index));
+    };
+
+    const remainingChars = 500 - inputText.length;
+
+    const handlePost = async (event) => {
         event.preventDefault();
-        console.log("handle input")
-        const token = localStorage.getItem('accessToken')
+        const token = localStorage.getItem('accessToken');
         try {
             const response = await fetch('http://localhost:5000/messages', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // This tells the server to expect JSON data
-                    'authorization': `Bearer ${token}`
+                    'authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ content: inputText, tags: ["test tag"] }),
-            })
+                body: JSON.stringify({ content: inputText, tags:tags }),
+            });
 
-            const data = await response.json()
+            const data = await response.json();
             if (response.ok) {
-                console.log(data)
-                setInputText('')
+                console.log(data);
+                setInputText('');
+                setTags([]);
+            } else {
+                console.log(data.message);
             }
-            else {
-                console.log(data.message)
-            }
-        }catch(error){
-            console.error(error)
+        } catch (error) {
+            console.error(error);
         }
-
-
-    }
+    };
 
     return (
         <div className="middle">
             <form action="" className="create-post" onSubmit={handlePost}>
-                <div className="profile-photo">
-                    <img src={profilepic} />
+                <div className="flex items-start gap-4 w-full">
+                    <div className="profile-photo">
+                        <img src={profilepic} alt="Profile" />
+                    </div>
+                    <div className="w-full">
+                        <div className="flex flex-wrap items-center gap-2 mb-4">
+                            {tags.map((tag, index) => (
+                                <div
+                                    key={index}
+                                    className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm"
+                                >
+                                    <span>{tag}</span>
+                                    <button
+                                        type="button"
+                                        className="ml-2 text-blue-500 hover:text-blue-700"
+                                        onClick={() => handleTagRemove(index)}
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <textarea
+                            placeholder="Write here.."
+                            id="create-post"
+                            rows="1"
+                            style={{ resize: 'none', overflow: 'hidden' }}
+                            value={inputText}
+                            onInput={handleInput}
+                            className="w-full mt-4 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <input
+                            type="text"
+                            id="tags"
+                            placeholder="Type tags seperated by comma or click enter"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={tagInput}
+                            onChange={handleTagInput}
+                            onKeyDown={handleTagKeyDown}
+                        />
+                    </div>
                 </div>
-                {/* <input type="text" placeholder="What's on your mind, Diana ?" id="create-post" /> */}
-                <textarea
-                    placeholder="Write here.."
-                    id="create-post"
-                    rows="1"
-                    style={{ resize: 'none', overflow: 'hidden' }}
-                    value={inputText}
-                    onInput={(event) => { handleInput(event) }}
-                />
-                <div className='flex flex-col items-center justify-center'>
+
+                <div className="flex flex-col items-center justify-center mt-4">
                     <input type="submit" value="Post" className="btn btn-primary" />
                     <small
-                        className={`block mt-1 text-sm ${remainingChars <= 50
-                            ? 'text-red-500' // Red color for <50 characters left
-                            : 'text-gray-500' // Gray color otherwise
+                        className={`block mt-1 text-sm ${remainingChars <= 50 ? 'text-red-500' : 'text-gray-500'
                             }`}
                     >
                         {remainingChars} chars left
                     </small>
                 </div>
             </form>
+
             <div className="feeds">
                 <div className="feed">
                     <div className="head">
                         <div className="user">
                             <div className="profile-photo">
-                                <img src={profilepic} />
+                                <img src={profilepic} alt="Feed Profile" />
                             </div>
                             <div className="info">
                                 <h3>Cat</h3>
@@ -86,19 +134,17 @@ const Middle = () => {
                             </div>
                         </div>
                     </div>
-
                     <div className="photo">
-                        <img src={profilepic} />
+                        <img src={profilepic} alt="Feed Content" />
                     </div>
-
                     <div className="action-buttons">
                         <div className="interaction-buttons">
-                            <span><BookmarkBorderOutlinedIcon /></span>
+                            <span>
+                                <BookmarkBorderOutlinedIcon />
+                            </span>
                         </div>
                     </div>
-
                 </div>
-
             </div>
         </div>
     );
