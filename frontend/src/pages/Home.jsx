@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Left from '../components/Left';
 import Middle from '../components/Middle';
@@ -7,6 +7,9 @@ import Navbar from '../components/Navbar';
 
 const Home = () => {
     const navigate = useNavigate();
+    const [messages, setMessages] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
