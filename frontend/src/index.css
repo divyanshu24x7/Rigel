@@ -30,6 +30,10 @@
 
 }
 
+/* * {
+    outline: 1px solid red;
+} */
+
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -37,7 +41,7 @@
     box-sizing: border-box;
     text-decoration: none;
     list-style: none;
-    border: none;
+    /* border: none; */
 }
 
 body {
@@ -229,6 +233,9 @@ main .container .left .profile {
 /* =============== Middle ============== */
 
 /* =============== Create Post ============== */
+.middle{
+    overflow-x: hidden;
+}
 .middle .create-post {
     width: 100%;
     display: flex;
@@ -247,7 +254,7 @@ main .container .left .profile {
     border-radius: 50%;
 }
 
-.middle .create-post textarea,
+/* .middle .create-post textarea,
 .middle .create-post input#tags {
     width: 100%;
     background: var(--color-white);
@@ -261,7 +268,7 @@ main .container .left .profile {
 .middle .create-post input#tags:focus {
     outline: none;
     border-color: var(--color-primary);
-}
+} */
 
 
 /* =============== Feeds ============== */

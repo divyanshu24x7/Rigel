@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import profilepic from '../assets/profile-pic.png';
-
 const Middle = () => {
     const [inputText, setInputText] = useState('');
     const [tagInput, setTagInput] = useState('');
@@ -48,7 +47,7 @@ const Middle = () => {
                     'Content-Type': 'application/json', // This tells the server to expect JSON data
                     'authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ content: inputText, tags:tags }),
+                body: JSON.stringify({ content: inputText, tags: tags }),
             });
 
             const data = await response.json();
@@ -72,23 +71,6 @@ const Middle = () => {
                         <img src={profilepic} alt="Profile" />
                     </div>
                     <div className="w-full">
-                        <div className="flex flex-wrap items-center gap-2 mb-4">
-                            {tags.map((tag, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm"
-                                >
-                                    <span>{tag}</span>
-                                    <button
-                                        type="button"
-                                        className="ml-2 text-blue-500 hover:text-blue-700"
-                                        onClick={() => handleTagRemove(index)}
-                                    >
-                                        &times;
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
                         <textarea
                             placeholder="Write here.."
                             id="create-post"
@@ -96,28 +78,53 @@ const Middle = () => {
                             style={{ resize: 'none', overflow: 'hidden' }}
                             value={inputText}
                             onInput={handleInput}
-                            className="w-full mt-4 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full mt-4 border-b-2 border-gray-300 px-3 py-2"
                         />
-                        <input
-                            type="text"
-                            id="tags"
-                            placeholder="Type tags seperated by comma or click enter"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value={tagInput}
-                            onChange={handleTagInput}
-                            onKeyDown={handleTagKeyDown}
-                        />
-                    </div>
-                </div>
+                        <div className='flex flex-col'>
+                            <div className='flex items-center'>
+                                <span><BookmarkBorderOutlinedIcon /></span>
+                                <input
+                                    type="text"
+                                    id="tags"
+                                    placeholder="Type tags seperated by comma"
+                                    className="w-full border-b-2 border-gray-300  px-3 py-2 "
+                                    value={tagInput}
+                                    onChange={handleTagInput}
+                                    onKeyDown={handleTagKeyDown}
+                                />
 
-                <div className="flex flex-col items-center justify-center mt-4">
-                    <input type="submit" value="Post" className="btn btn-primary" />
-                    <small
-                        className={`block mt-1 text-sm ${remainingChars <= 50 ? 'text-red-500' : 'text-gray-500'
-                            }`}
-                    >
-                        {remainingChars} chars left
-                    </small>
+                                <div className="flex flex-col items-center justify-center mt-4">
+                                    <input type="submit" value="Post" className="btn btn-primary" />
+                                    <small
+                                        className={`block mt-1 text-sm ${remainingChars <= 50 ? 'text-red-500' : 'text-gray-500'
+                                            }`}
+                                    >
+                                        {remainingChars} chars left
+                                    </small>
+                                </div>
+
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
+                                {tags.map((tag, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm"
+                                    >
+                                        <span>{tag}</span>
+                                        <button
+                                            type="button"
+                                            className="ml-2 text-blue-500 hover:text-blue-700"
+                                            onClick={() => handleTagRemove(index)}
+                                        >
+                                            &times;
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
             </form>
 
