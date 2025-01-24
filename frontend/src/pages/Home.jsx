@@ -7,9 +7,6 @@ import Navbar from '../components/Navbar';
 
 const Home = () => {
     const navigate = useNavigate();
-    const [messages, setMessages] = useState([]);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
