@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import profilepic from '../assets/profile-pic.png';
+import AttachmentOutlinedIcon from '@mui/icons-material/AttachmentOutlined';
+
 const Middle = () => {
     const [inputText, setInputText] = useState('');
     const [tagInput, setTagInput] = useState('');
@@ -82,6 +84,10 @@ const Middle = () => {
                         />
                         <div className='flex flex-col'>
                             <div className='flex items-center'>
+                            <span>
+                                {/* Attachment Icon from Material-UI */}
+                                <AttachmentOutlinedIcon className="mr-2 cursor-pointer" />
+                            </span>
                                 <span><BookmarkBorderOutlinedIcon /></span>
                                 <input
                                     type="text"

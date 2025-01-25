@@ -19,12 +19,16 @@ const messageSchema = new mongoose.Schema({
     authorId: {
         type: mongoose.Schema.Types.ObjectId, // Reference to a User
         required: true,
-        ref: 'User', // Assuming a 'User' model exists
+        ref: "User", // Assuming a 'User' model exists
     },
     status: {
         type: String,
-        enum: ['unread', 'replied', 'in pool'], // Valid statuses
-        default: 'in pool',
+        enum: ["unread", "replied", "in pool"], // Valid statuses
+        default: "in pool",
+    },
+    imageUrl: {
+        type: String, // URL or path to the image
+        default: null, // Optional
     },
     createdAt: {
         type: Date,
@@ -36,7 +40,7 @@ const messageSchema = new mongoose.Schema({
     },
     repliedBy: {
         type: mongoose.Schema.Types.ObjectId, // Reference to the replier
-        ref: 'User', // Assuming a 'User' model exists
+        ref: "User", // Assuming a 'User' model exists
         default: null,
     },
     isInPool: {
@@ -48,4 +52,4 @@ const messageSchema = new mongoose.Schema({
 // Add an index for optimizing searches on tags and pool status
 messageSchema.index({ tags: 1, isInPool: 1 });
 
-export default mongoose.model("Messages", messageSchema)
+export default mongoose.model("Messages", messageSchema);

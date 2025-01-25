@@ -6,6 +6,9 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import Message from './models/Messages.js'; // Import your Message model
 import Tag from './models/Tags.js'; // Import your Tag model
+import multer from "multer"; // Import Multer
+import path from "path"; // For handling file paths
+import fs from "fs";
 
 const app = express();
 dotenv.config();
@@ -68,43 +71,43 @@ async function handleTags(tags) {
     }
 }
 
-app.post('/messages', authenticateToken, async (req, res) => {
-    try {
-        const { content, tags } = req.body;
-        const authorId = req.user.userId;
-        console.log(content)
-        console.log(tags)
+// app.post('/messages', authenticateToken, async (req, res) => {
+//     try {
+//         const { content, tags } = req.body;
+//         const authorId = req.user.userId;
+//         console.log(content)
+//         console.log(tags)
 
-        // Validate input
-        if (!content || !tags || !Array.isArray(tags) || tags.length === 0) {
-            return res
-                .status(400)
-                .json({ error: 'Invalid input. Message content and at least one tag are required.' });
-        }
+//         // Validate input
+//         if (!content || !tags || !Array.isArray(tags) || tags.length === 0) {
+//             return res
+//                 .status(400)
+//                 .json({ error: 'Invalid input. Message content and at least one tag are required.' });
+//         }
 
-        // Process tags: normalize and update frequency in Tag collection
-        await handleTags(tags);
+//         // Process tags: normalize and update frequency in Tag collection
+//         await handleTags(tags);
 
-        // Create a new message document for the general pool
-        const poolMessage = new Message({
-            content,
-            tags,
-            createdAt: new Date(),
-            authorId: authorId, // Assuming `authenticateToken` sets `req.user`
-        });
+//         // Create a new message document for the general pool
+//         const poolMessage = new Message({
+//             content,
+//             tags,
+//             createdAt: new Date(),
+//             authorId: authorId, // Assuming `authenticateToken` sets `req.user`
+//         });
 
-        // Save the message
-        await poolMessage.save();
+//         // Save the message
+//         await poolMessage.save();
 
-        res.status(201).json({
-            message: 'Message stored successfully',
-            poolData: poolMessage,
-        });
-    } catch (error) {
-        console.error('Error storing message:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
+//         res.status(201).json({
+//             message: 'Message stored successfully',
+//             poolData: poolMessage,
+//         });
+//     } catch (error) {
+//         console.error('Error storing message:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
 
 app.get('/tags/top', async (req, res) => {
   try {
@@ -134,6 +137,97 @@ app.get("/messages", async (req, res) => {
     }
 });
 
+// Configure Multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/"); // Directory to save images
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, uniqueSuffix + path.extname(file.originalname)); // Ensure unique filenames
+    },
+});
+
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extName = allowedTypes.test(
+            path.extname(file.originalname).toLowerCase()
+        );
+        const mimeType = allowedTypes.test(file.mimetype);
+
+        if (extName && mimeType) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only image files are allowed!"));
+        }
+    },
+});
+
+// Ensure the `uploads` directory exists
+if (!fs.existsSync("uploads")) {
+    fs.mkdirSync("uploads");
+}
+
+// Updated `/messages` POST route
+app.post(
+    "/messages",
+    authenticateToken,
+    upload.single("image"), // Handle single image upload
+    async (req, res) => {
+        try {
+            const { content } = req.body;
+            let { tags } = req.body;
+            const authorId = req.user.userId;
+            const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+            // Parse tags if it's a string (e.g., JSON stringified array)
+            if (typeof tags === "string") {
+                try {
+                    tags = JSON.parse(tags);
+                } catch (err) {
+                    return res.status(400).json({ error: "Invalid tags format." });
+                }
+            }
+
+            // Validate input
+            if (!content || !tags || !Array.isArray(tags) || tags.length === 0) {
+                return res
+                    .status(400)
+                    .json({ error: "Invalid input. Message content and at least one tag are required." });
+            }
+
+            // Process tags: normalize and update frequency in Tag collection
+            await handleTags(tags);
+
+            // Create a new message document
+            const poolMessage = new Message({
+                content,
+                tags,
+                imageUrl, // Save the image path
+                authorId,
+            });
+
+            // Save the message
+            await poolMessage.save();
+
+            res.status(201).json({
+                message: "Message stored successfully",
+                poolData: poolMessage,
+            });
+        } catch (error) {
+            console.error("Error storing message:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
+
+
+// Serve static files from the `uploads` directory
+app.use("/uploads", express.static("uploads"));
+
+app.use(express.urlencoded({ extended: true }));
 
 app.listen(PORT, () => {
     console.log('Server running on port:' + PORT);
