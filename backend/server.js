@@ -206,7 +206,7 @@ app.post(
             const { content } = req.body;
             let { tags } = req.body;
             const authorId = req.user.userId;
-            const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+            const imageUrl = req.file ? `/uploads/${req.file.filename}` : "/uploads/no-picture.jpg";
 
             // Parse tags if it's a string (e.g., JSON stringified array)
             if (typeof tags === "string") {
