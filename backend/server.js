@@ -137,6 +137,32 @@ app.get("/messages", async (req, res) => {
     }
 });
 
+// Fetch post by position
+// Add this route to your backend
+app.get('/messages/:position', async (req, res) => {
+    try {
+        const position = parseInt(req.params.position); // Parse position from URL
+        if (isNaN(position) || position < 0) {
+            return res.status(400).json({ message: 'Invalid position value.' });
+        }
+
+        const posts = await Message.find({})
+            .sort({ createdAt: -1 }) // Sort by newest first
+            .skip(position) // Skip posts to get the one at the given position
+            .limit(1); // Limit the result to one post
+
+        if (posts.length > 0) {
+            res.status(200).json(posts[0]); // Send the post at the given position
+        } else {
+            res.status(404).json({ message: 'No more posts available.' });
+        }
+    } catch (error) {
+        console.error('Error fetching post:', error);
+        res.status(500).json({ message: 'An error occurred while fetching the post.' });
+    }
+});
+
+
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {

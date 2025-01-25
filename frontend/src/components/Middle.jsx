@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import profilepic from '../assets/profile-pic.png';
 import AttachmentOutlinedIcon from '@mui/icons-material/AttachmentOutlined';
@@ -9,6 +9,38 @@ const Middle = () => {
     const [tags, setTags] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null); // State for the file
     const fileInputRef = useRef(null); // Reference for hidden file input
+    const [currentPostIndex, setCurrentPostIndex] = useState(0); // Track the current post index
+    const [currentPost, setCurrentPost] = useState(null); // Store the current post data
+
+    // Function to fetch a post by its position
+    const fetchPost = async (index) => {
+        try {
+            const response = await fetch(`http://localhost:5000/messages/${index}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentPost(data); // Update the current post
+            } else {
+                console.log(await response.json()); // Log error message
+            }
+        } catch (error) {
+            console.error('Error fetching post:', error);
+        }
+    };
+
+    // Initial fetch for the latest post (index 0)
+    useEffect(() => {
+        fetchPost(0);
+    }, []);
+
+    // Handle "Next" button click
+    const handleNext = () => {
+        setCurrentPostIndex((prevIndex) => {
+            const newIndex = prevIndex + 1;
+            fetchPost(newIndex); // Fetch the next post
+            console.log(currentPost.image);
+            return newIndex;
+        });
+    };
 
     const handleInput = (event) => {
         const maxLength = 500;
@@ -181,52 +213,55 @@ const Middle = () => {
                 </div>
             </form>
             <div className="feeds">
-                <div className="feed">
-                    <div className="head">
-                        <div className="user">
-                            <div className="profile-photo">
-                                <img src={profilepic} alt="Feed Profile" />
-                            </div>
-                            <div className="info">
-                                <h3>Cat</h3>
-                                <small>Dubai, 15 Minutes Ago</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="text-content">
-                        <p>
-                            This is a sample paragraph of text describing the feed content. It can contain a short description,
-                            message, or caption related to the photo below.
-                        </p>
-                    </div>
-                    <div className="photo">
-                        <img src={profilepic} alt="Feed Content" />
-                    </div>
-                    <div className="action-buttons flex flex-wrap items-center gap-4">
-                        {/* Left section: Bookmark and Tags */}
-                        <div className="interaction-buttons flex flex-wrap items-center gap-2">
-                            <span>
-                                <BookmarkBorderOutlinedIcon />
-                            </span>
-                            <div className="tag-bubbles flex flex-wrap gap-2">
-                                <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
-                                    <span>#Nature</span>
+                {currentPost ? (
+                    <div className="feed">
+                        <div className="head">
+                            <div className="user">
+                                <div className="profile-photo">
+                                    <img src={profilepic} alt="Feed Profile" />
                                 </div>
-                                <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
-                                    <span>#Travel</span>
-                                </div>
-                                <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
-                                    <span>#Photography</span>
+                                <div className="info">
+                                    <h3>{currentPost.author || 'Anonymous'}</h3>
+                                    <small>{currentPost.location || 'Unknown'}, {new Date(currentPost.createdAt).toLocaleString()}</small>
                                 </div>
                             </div>
                         </div>
-                        {/* Right section: Reply and Next buttons */}
-                        <div className="reply-next-buttons flex gap-2 ml-auto">
-                            <button className="btn btn-primary">Reply</button>
-                            <button className="btn btn-primary">Next</button>
+                        <div className="text-content">
+                            <p>{currentPost.content || 'No content available.'}</p>
+                        </div>
+                        {currentPost.imageUrl && (
+                            <div className="photo">
+                                <img src={`http://localhost:5000${currentPost.imageUrl}`} alt="Feed Content" />
+                            </div>
+                        )}
+                        <div className="action-buttons flex flex-wrap items-center gap-4">
+                            <div className="interaction-buttons flex flex-wrap items-center gap-2">
+                                <span>
+                                    <BookmarkBorderOutlinedIcon />
+                                </span>
+                                <div className="tag-bubbles flex flex-wrap gap-2">
+                                    {currentPost.tags &&
+                                        currentPost.tags.map((tag, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm"
+                                            >
+                                                <span>#{tag}</span>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                            <div className="reply-next-buttons flex gap-2 ml-auto">
+                                <button className="btn btn-primary">Reply</button>
+                                <button className="btn btn-primary" onClick={handleNext}>
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <p>Loading post...</p>
+                )}
             </div>
         </div>
     );
