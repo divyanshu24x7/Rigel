@@ -193,14 +193,37 @@ const Middle = () => {
                             </div>
                         </div>
                     </div>
+                    <div className="text-content">
+                        <p>
+                            This is a sample paragraph of text describing the feed content. It can contain a short description,
+                            message, or caption related to the photo below.
+                        </p>
+                    </div>
                     <div className="photo">
                         <img src={profilepic} alt="Feed Content" />
                     </div>
-                    <div className="action-buttons">
-                        <div className="interaction-buttons">
+                    <div className="action-buttons flex flex-wrap items-center gap-4">
+                        {/* Left section: Bookmark and Tags */}
+                        <div className="interaction-buttons flex flex-wrap items-center gap-2">
                             <span>
                                 <BookmarkBorderOutlinedIcon />
                             </span>
+                            <div className="tag-bubbles flex flex-wrap gap-2">
+                                <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
+                                    <span>#Nature</span>
+                                </div>
+                                <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
+                                    <span>#Travel</span>
+                                </div>
+                                <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
+                                    <span>#Photography</span>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Right section: Reply and Next buttons */}
+                        <div className="reply-next-buttons flex gap-2 ml-auto">
+                            <button className="btn btn-primary">Reply</button>
+                            <button className="btn btn-primary">Next</button>
                         </div>
                     </div>
                 </div>
