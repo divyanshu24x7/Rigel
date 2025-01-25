@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import profilepic from '../assets/profile-pic.png';
 import AttachmentOutlinedIcon from '@mui/icons-material/AttachmentOutlined';
@@ -7,14 +7,16 @@ const Middle = () => {
     const [inputText, setInputText] = useState('');
     const [tagInput, setTagInput] = useState('');
     const [tags, setTags] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null); // State for the file
+    const fileInputRef = useRef(null); // Reference for hidden file input
 
     const handleInput = (event) => {
         const maxLength = 500;
         const value = event.target.value;
         if (value.length <= maxLength) {
             setInputText(value);
-            event.target.style.height = 'auto'; // Reset height to calculate new height
-            event.target.style.height = `${event.target.scrollHeight}px`; // Set height based on content
+            event.target.style.height = 'auto';
+            event.target.style.height = `${event.target.scrollHeight}px`;
         }
     };
 
@@ -39,17 +41,39 @@ const Middle = () => {
 
     const remainingChars = 500 - inputText.length;
 
+    const handleFileInputClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = (event) => {
+        const files = event.target.files;
+        if (files && files[0]) {
+            setSelectedFile(files[0]); // Save the selected file
+            console.log('Selected file:', files[0]);
+        }
+    };
+
     const handlePost = async (event) => {
         event.preventDefault();
         const token = localStorage.getItem('accessToken');
+
+        // Create FormData
+        const formData = new FormData();
+        formData.append('content', inputText);
+        formData.append('tags', JSON.stringify(tags)); // Serialize tags as a string
+        if (selectedFile) {
+            formData.append('image', selectedFile); // Append the file
+        }
+
         try {
             const response = await fetch('http://localhost:5000/messages', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // This tells the server to expect JSON data
                     'authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ content: inputText, tags: tags }),
+                body: formData, // Use FormData
             });
 
             const data = await response.json();
@@ -57,6 +81,7 @@ const Middle = () => {
                 console.log(data);
                 setInputText('');
                 setTags([]);
+                setSelectedFile(null); // Reset file state
             } else {
                 console.log(data.message);
             }
@@ -67,7 +92,7 @@ const Middle = () => {
 
     return (
         <div className="middle">
-            <form action="" className="create-post" onSubmit={handlePost}>
+            <form className="create-post" onSubmit={handlePost}>
                 <div className="flex items-start gap-4 w-full">
                     <div className="profile-photo">
                         <img src={profilepic} alt="Profile" />
@@ -75,40 +100,45 @@ const Middle = () => {
                     <div className="w-full">
                         <textarea
                             placeholder="Write here.."
-                            id="create-post"
                             rows="1"
                             style={{ resize: 'none', overflow: 'hidden' }}
                             value={inputText}
                             onInput={handleInput}
                             className="w-full mt-4 border-b-2 border-gray-300 px-3 py-2"
                         />
-                        <div className='flex flex-col'>
-                            <div className='flex items-center'>
-                            <span>
-                                {/* Attachment Icon from Material-UI */}
-                                <AttachmentOutlinedIcon className="mr-2 cursor-pointer" />
-                            </span>
-                                <span><BookmarkBorderOutlinedIcon /></span>
+                        <div className="flex flex-col">
+                            <div className="flex items-center">
+                                <span>
+                                    <AttachmentOutlinedIcon
+                                        className="mr-2 cursor-pointer"
+                                        onClick={handleFileInputClick}
+                                    />
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileChange}
+                                    />
+                                </span>
+                                <span>
+                                    <BookmarkBorderOutlinedIcon />
+                                </span>
                                 <input
                                     type="text"
-                                    id="tags"
-                                    placeholder="Type tags seperated by comma"
-                                    className="w-full border-b-2 border-gray-300  px-3 py-2 "
+                                    placeholder="Type tags separated by comma"
+                                    className="w-full border-b-2 border-gray-300 px-3 py-2"
                                     value={tagInput}
                                     onChange={handleTagInput}
                                     onKeyDown={handleTagKeyDown}
                                 />
-
                                 <div className="flex flex-col items-center justify-center mt-4">
                                     <input type="submit" value="Post" className="btn btn-primary" />
                                     <small
-                                        className={`block mt-1 text-sm ${remainingChars <= 50 ? 'text-red-500' : 'text-gray-500'
-                                            }`}
+                                        className={`block mt-1 text-sm ${remainingChars <= 50 ? 'text-red-500' : 'text-gray-500'}`}
                                     >
                                         {remainingChars} chars left
                                     </small>
                                 </div>
-
                             </div>
                             <div className="flex flex-wrap items-center gap-2 mb-4">
                                 {tags.map((tag, index) => (
@@ -128,12 +158,9 @@ const Middle = () => {
                                 ))}
                             </div>
                         </div>
-
                     </div>
-
                 </div>
             </form>
-
             <div className="feeds">
                 <div className="feed">
                     <div className="head">
@@ -159,6 +186,7 @@ const Middle = () => {
                     </div>
                 </div>
             </div>
+            
         </div>
     );
 };
