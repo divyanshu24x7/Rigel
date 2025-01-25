@@ -51,8 +51,11 @@ const Middle = () => {
         const files = event.target.files;
         if (files && files[0]) {
             setSelectedFile(files[0]); // Save the selected file
-            console.log('Selected file:', files[0]);
         }
+    };
+
+    const handleFileRemove = () => {
+        setSelectedFile(null); // Reset file state
     };
 
     const handlePost = async (event) => {
@@ -157,6 +160,22 @@ const Middle = () => {
                                     </div>
                                 ))}
                             </div>
+                            {selectedFile && (
+                                <div className="flex items-center gap-2 mt-2">
+                                    <img
+                                        src={URL.createObjectURL(selectedFile)}
+                                        alt="Preview"
+                                        className="w-12 h-12 object-cover rounded"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="text-red-500 hover:text-red-700"
+                                        onClick={handleFileRemove}
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -186,7 +205,6 @@ const Middle = () => {
                     </div>
                 </div>
             </div>
-            
         </div>
     );
 };
