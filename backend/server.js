@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import Message from './models/Messages.js'; // Import your Message model
 import Tag from './models/Tags.js'; // Import your Tag model
+import User from './models/User.js'; // Import User model
 import multer from "multer"; // Import Multer
 import path from "path"; // For handling file paths
 import fs from "fs";
@@ -237,6 +238,9 @@ app.post(
 
             // Save the message
             await poolMessage.save();
+
+            // Increment the user's total posts
+            await User.findByIdAndUpdate(authorId, { $inc: { totalPosts: 1 } });
 
             res.status(201).json({
                 message: "Message stored successfully",
