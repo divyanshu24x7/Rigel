@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 import profilepic from '../assets/profile-pic.png';
 import SearchIcon from '@mui/icons-material/Search';
 const Navbar = () => {
+    const navigate = useNavigate()
     const handleSignOut = ()=>{
         localStorage.removeItem('accessToken')
         localStorage.removeItem('userId')
+        navigate('/auth/login')
     }
   return (
     <div className="container">
@@ -13,7 +16,7 @@ const Navbar = () => {
             </h2>
             <div className="search-bar">
                 <SearchIcon />
-                <input type="search" placeholder="Search htmlFor creators, inspirations, and projects" />
+                <input type="search" placeholder="Search for tags" />
             </div>
             <div className="create">
                 <label className="btn btn-primary" htmlFor="create-post"
