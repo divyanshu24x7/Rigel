@@ -13,7 +13,7 @@ const Navbar = () => {
             </h2>
             <div className="search-bar">
                 <SearchIcon />
-                <input type="search" placeholder="Search htmlFor creators, inspirations, and projects" />
+                <input type="search" placeholder="Search for tags" />
             </div>
             <div className="create">
                 <label className="btn btn-primary" htmlFor="create-post"
