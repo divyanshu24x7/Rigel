@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 import profilepic from '../assets/profile-pic.png';
 import SearchIcon from '@mui/icons-material/Search';
 const Navbar = () => {
+    const navigate = useNavigate()
     const handleSignOut = ()=>{
         localStorage.removeItem('accessToken')
         localStorage.removeItem('userId')
+        navigate('/auth/login')
     }
   return (
     <div className="container">
