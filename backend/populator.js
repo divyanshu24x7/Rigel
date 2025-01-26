@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 import { faker } from '@faker-js/faker';
 import fetch from 'node-fetch';
-
+import Message from './models/Messages.js';
+import User from './models/User.js';
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/your_database_name', {
+mongoose.connect('mongodb://localhost:27017/rigel', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 }).then(() => console.log('Connected to MongoDB')).catch(err => console.error('MongoDB connection error:', err));
@@ -19,6 +20,7 @@ async function fetchRandomCatImage() {
         return '/profile_pics/default.jpg';
     }
 }
+
 
 // Function to fetch a random image URL for post images
 async function fetchRandomPostImage() {
@@ -84,15 +86,26 @@ function generateRelevantTags(theme) {
 }
 
 // Function to generate a random user
+// Function to generate a random user
+// Function to generate a random user
 async function generateRandomUser(messagesPerUser) {
     const username = faker.internet.userName();
-    const email = faker.internet.email();
+    let email = faker.internet.email();
+    
+    // Ensure email is unique
+    let emailExists = await User.findOne({ email });
+    while (emailExists) {
+        console.log(`Duplicate email found: ${email}. Generating a new one...`);
+        email = faker.internet.email();
+        emailExists = await User.findOne({ email });
+    }
+
     const password = faker.internet.password();
     const profilePic = await fetchRandomCatImage();
     const bio = generateThemedContent().content;
 
-    const user = {
-        name: username,
+    const user = new User({
+        username: username,
         email: email,
         password: password,
         profilePic: profilePic,
@@ -100,9 +113,10 @@ async function generateRandomUser(messagesPerUser) {
         preferredTags: [],
         notPreferredTags: [],
         totalPosts: 0, // Default value; will update later
-    };
+    });
 
-    console.log('Generated User:', user);
+    // Save the user to the database
+    await user.save();
     
     // Generate the posts for this user and update totalPosts
     let posts = [];
@@ -113,10 +127,13 @@ async function generateRandomUser(messagesPerUser) {
 
     // Update the totalPosts field with the correct number
     user.totalPosts = posts.length;
-    console.log(`User ${user.name} has ${user.totalPosts} posts.`);
+    console.log(`User ${user.username} has ${user.totalPosts} posts.`);
 
     return user;
 }
+
+
+
 
 // Function to generate a random message
 async function generateRandomMessage(author) {
@@ -124,17 +141,20 @@ async function generateRandomMessage(author) {
     const tags = generateRelevantTags(theme);
     const imageUrl = await fetchRandomPostImage();
 
-    const message = {
+    const message = new Message({
         content: content,
         tags: tags,
-        authorId: author.name, // Just displaying the author name for now
+        authorId: author._id, // Reference to the user's ObjectId
         status: 'in pool',
         imageUrl: imageUrl,
         createdAt: new Date(),
         lastActionAt: null,
         repliedBy: null,
         isInPool: true,
-    };
+    });
+
+    // Save the message to the database
+    await message.save();
 
     console.log('Generated Message:', message);
     return message;
