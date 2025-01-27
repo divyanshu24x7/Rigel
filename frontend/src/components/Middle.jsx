@@ -13,19 +13,48 @@ const Middle = () => {
     const [currentPost, setCurrentPost] = useState(null); // Store the current post data
 
     // Function to fetch a post by its position
+    // const fetchPost = async (index) => {
+    //     try {
+    //         const response = await fetch(`http://localhost:5000/messages/${index}`);
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             setCurrentPost(data); // Update the current post
+    //         } else {
+    //             console.log(await response.json()); // Log error message
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching post:', error);
+    //     }
+    // };
+
     const fetchPost = async (index) => {
         try {
-            const response = await fetch(`http://localhost:5000/messages/${index}`);
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`http://localhost:5000/messages/${index}`, {
+                headers: {
+                    'authorization': `Bearer ${token}`,
+                },
+            });
+    
             if (response.ok) {
                 const data = await response.json();
-                setCurrentPost(data); // Update the current post
+                setCurrentPost(data);
+    
+                // Mark the post as seen
+                await fetch(`http://localhost:5000/messages/${data._id}/seen`, {
+                    method: 'PUT',
+                    headers: {
+                        'authorization': `Bearer ${token}`,
+                    },
+                });
             } else {
-                console.log(await response.json()); // Log error message
+                console.error(await response.json());
             }
         } catch (error) {
             console.error('Error fetching post:', error);
         }
     };
+    
 
     // Initial fetch for the latest post (index 0)
     useEffect(() => {
@@ -34,6 +63,7 @@ const Middle = () => {
 
     // Handle "Next" button click
     const handleNext = () => {
+        const token = localStorage.getItem('accessToken');
         setCurrentPostIndex((prevIndex) => {
             const newIndex = prevIndex + 1;
             fetchPost(newIndex); // Fetch the next post

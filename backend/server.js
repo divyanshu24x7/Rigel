@@ -72,44 +72,6 @@ async function handleTags(tags) {
     }
 }
 
-// app.post('/messages', authenticateToken, async (req, res) => {
-//     try {
-//         const { content, tags } = req.body;
-//         const authorId = req.user.userId;
-//         console.log(content)
-//         console.log(tags)
-
-//         // Validate input
-//         if (!content || !tags || !Array.isArray(tags) || tags.length === 0) {
-//             return res
-//                 .status(400)
-//                 .json({ error: 'Invalid input. Message content and at least one tag are required.' });
-//         }
-
-//         // Process tags: normalize and update frequency in Tag collection
-//         await handleTags(tags);
-
-//         // Create a new message document for the general pool
-//         const poolMessage = new Message({
-//             content,
-//             tags,
-//             createdAt: new Date(),
-//             authorId: authorId, // Assuming `authenticateToken` sets `req.user`
-//         });
-
-//         // Save the message
-//         await poolMessage.save();
-
-//         res.status(201).json({
-//             message: 'Message stored successfully',
-//             poolData: poolMessage,
-//         });
-//     } catch (error) {
-//         console.error('Error storing message:', error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// });
-
 app.get('/tags/top', async (req, res) => {
   try {
     const n = parseInt(req.query.n) || 10; // Get `n` from query params, default to 10
@@ -138,25 +100,78 @@ app.get("/messages", async (req, res) => {
     }
 });
 
-// Fetch post by position
-// Add this route to your backend
-app.get('/messages/:position', async (req, res) => {
+app.put('/messages/:id/seen', authenticateToken, async (req, res) => {
     try {
-        const position = parseInt(req.params.position); // Parse position from URL
+        const messageId = req.params.id;
+        const userId = req.user.userId;
+
+        // Update the seenBy field for the given user
+        await Message.findByIdAndUpdate(messageId, {
+            $set: { [`seenBy.${userId}`]: true }
+        });
+
+        res.status(200).json({ message: 'Post marked as seen.' });
+    } catch (error) {
+        console.error('Error marking post as seen:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// app.get('/messages/:position', authenticateToken, async (req, res) => {
+//     try {
+//         const position = parseInt(req.params.position);
+//         const userId = req.user.userId;
+
+//         if (isNaN(position) || position < 0) {
+//             return res.status(400).json({ message: 'Invalid position value.' });
+//         }
+
+//         const posts = await Message.find({})
+//             .sort({ createdAt: -1 })
+//             .skip(position)
+//             .limit(1);
+
+//         if (posts.length > 0) {
+//             const post = posts[0];
+
+//             // // Mark the post as seen by the current user
+//             // await Message.findByIdAndUpdate(post._id, {
+//             //     $set: { [`seenBy.${userId}`]: true }
+//             // });
+
+//             res.status(200).json(post);
+//         } else {
+//             res.status(404).json({ message: 'No more posts available.' });
+//         }
+//     } catch (error) {
+//         console.error('Error fetching post:', error);
+//         res.status(500).json({ message: 'An error occurred while fetching the post.' });
+//     }
+// });
+
+app.get('/messages/:position', authenticateToken, async (req, res) => {
+    try {
+        const position = parseInt(req.params.position);
+        const userId = req.user.userId;
+
         if (isNaN(position) || position < 0) {
             return res.status(400).json({ message: 'Invalid position value.' });
         }
 
-        const posts = await Message.find({})
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip(position) // Skip posts to get the one at the given position
-            .limit(1); // Limit the result to one post
+        // Filter out posts already seen by the user
+        const unseenPosts = await Message.find({
+            [`seenBy.${userId}`]: { $exists: false }, // User's ID is not in the seenBy map
+        })
+            .sort({ createdAt: -1 });
 
-        if (posts.length > 0) {
-            res.status(200).json(posts[0]); // Send the post at the given position
-        } else {
-            res.status(404).json({ message: 'No more posts available.' });
+        if (position >= unseenPosts.length) {
+            return res.status(404).json({ message: 'No more unseen posts available.' });
         }
+
+        // Get the post at the specified position
+        const post = unseenPosts[position];
+
+        res.status(200).json(post);
     } catch (error) {
         console.error('Error fetching post:', error);
         res.status(500).json({ message: 'An error occurred while fetching the post.' });
@@ -197,7 +212,6 @@ if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads");
 }
 
-// Updated `/messages` POST route
 app.post(
     "/messages",
     authenticateToken,
@@ -234,6 +248,8 @@ app.post(
                 tags,
                 imageUrl, // Save the image path
                 authorId,
+                // seenByAuthor: true, // Mark as seen by the author upon creation
+                seenBy: { [authorId]: true },
             });
 
             // Save the message

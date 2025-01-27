@@ -47,6 +47,11 @@ const messageSchema = new mongoose.Schema({
         type: Boolean,
         default: true, // Indicates if the message is available for delivery
     },
+    seenBy: {
+        type: Map, // MongoDB's object field behaves like a hashmap
+        of: Boolean, // Store a `true` value for users who have seen the post
+        default: {}, // Initialize as an empty object
+    },
 });
 
 // Add an index for optimizing searches on tags and pool status
