@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
 import profilePic from '../assets/profile-pic.png';
 
 const ProfileComponent = () => {
@@ -74,8 +73,11 @@ const ProfileComponent = () => {
                 {preferredTags.map((tag, index) => (
                   <div key={index} className="bg-blue-200 text-blue-800 rounded-full px-4 py-1 flex items-center">
                     {tag}
-                    <button className="ml-2" onClick={() => handleTagRemove(preferredTags, setPreferredTags, tag)}>
-                      <X size={16} />
+                    <button
+                      className="ml-2 text-sm font-bold text-red-500"
+                      onClick={() => handleTagRemove(preferredTags, setPreferredTags, tag)}
+                    >
+                      &#x2715;
                     </button>
                   </div>
                 ))}
@@ -87,8 +89,11 @@ const ProfileComponent = () => {
                   onChange={(e) => setSearchTag(e.target.value)}
                   className="p-2 border border-gray-300 rounded-md flex-1"
                 />
-                <button onClick={() => handleTagAdd(preferredTags, setPreferredTags)} className="p-2 bg-blue-500 text-white rounded-md">
-                  <Plus size={16} />
+                <button
+                  onClick={() => handleTagAdd(preferredTags, setPreferredTags)}
+                  className="p-2 bg-blue-500 text-white rounded-md"
+                >
+                  +
                 </button>
               </div>
             </div>
@@ -100,8 +105,11 @@ const ProfileComponent = () => {
                 {notPreferredTags.map((tag, index) => (
                   <div key={index} className="bg-red-200 text-red-800 rounded-full px-4 py-1 flex items-center">
                     {tag}
-                    <button className="ml-2" onClick={() => handleTagRemove(notPreferredTags, setNotPreferredTags, tag)}>
-                      <X size={16} />
+                    <button
+                      className="ml-2 text-sm font-bold text-red-500"
+                      onClick={() => handleTagRemove(notPreferredTags, setNotPreferredTags, tag)}
+                    >
+                      &#x2715;
                     </button>
                   </div>
                 ))}
@@ -113,8 +121,11 @@ const ProfileComponent = () => {
                   onChange={(e) => setSearchTag(e.target.value)}
                   className="p-2 border border-gray-300 rounded-md flex-1"
                 />
-                <button onClick={() => handleTagAdd(notPreferredTags, setNotPreferredTags)} className="p-2 bg-red-500 text-white rounded-md">
-                  <Plus size={16} />
+                <button
+                  onClick={() => handleTagAdd(notPreferredTags, setNotPreferredTags)}
+                  className="p-2 bg-red-500 text-white rounded-md"
+                >
+                  +
                 </button>
               </div>
             </div>
@@ -126,4 +137,3 @@ const ProfileComponent = () => {
 };
 
 export default ProfileComponent;
-
