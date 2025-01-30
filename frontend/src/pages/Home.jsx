@@ -1,20 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import Left from '../components/Left';
 import Middle from '../components/Middle';
 import Right from '../components/Right';
 import Navbar from '../components/Navbar';
 
 const Home = () => {
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            navigate('/auth/login');
-        }
-    }, [navigate]);
-
     return (
         <div>
             <nav>

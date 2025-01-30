@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import profilepic from '../assets/profile-pic.png';
 import HomeIcon from '@mui/icons-material/Home';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
@@ -7,11 +8,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 
 const Left = () => {
-    const [activeMenu, setActiveMenu] = useState('Home');
-
-    const handleMenuClick = (menu) => {
-        setActiveMenu(menu);
-    };
+    const location = useLocation();
+    const activeMenu = location.pathname;
 
     return (
         <div className="left">
@@ -21,49 +19,46 @@ const Left = () => {
                 </div>
                 <div className="handle">
                     <h4>Cat</h4>
-                    <p className="text-muted">
-                        @cat
-                    </p>
+                    <p className="text-muted">@cat</p>
                 </div>
             </a>
 
             <div className="sidebar">
-                <a 
-                    className={`menu-item ${activeMenu === 'Home' ? 'active' : ''}`} 
-                    onClick={() => handleMenuClick('Home')}
+                <Link 
+                    className={`menu-item ${activeMenu === '/' ? 'active' : ''}`} 
+                    to="/"
                 >
                     <span className="ml-4"><HomeIcon /></span>
                     <h3>Home</h3>
-                </a>
-                <a 
-                    className={`menu-item ${activeMenu === 'About' ? 'active' : ''}`} 
-                    onClick={() => handleMenuClick('About')}
+                </Link>
+                <Link 
+                    className={`menu-item ${activeMenu === '/about' ? 'active' : ''}`} 
+                    to="/about"
                 >
                     <span className="ml-4"><InfoOutlinedIcon /></span>
                     <h3>About</h3>
-                </a>
-                <a 
-                    className={`menu-item ${activeMenu === 'Messages' ? 'active' : ''}`} 
-                    onClick={() => handleMenuClick('Messages')}
-                    id="messages-notifications"
+                </Link>
+                <Link 
+                    className={`menu-item ${activeMenu === '/messages' ? 'active' : ''}`} 
+                    to="/messages"
                 >
                     <span className="ml-4"><EmailOutlinedIcon /></span>
                     <h3>Messages</h3>
-                </a>
-                <a 
-                    className={`menu-item ${activeMenu === 'Profile' ? 'active' : ''}`} 
-                    onClick={() => handleMenuClick('Profile')}
+                </Link>
+                <Link 
+                    className={`menu-item ${activeMenu === '/profile' ? 'active' : ''}`} 
+                    to="/profile"
                 >
                     <span className="ml-4"><Person2OutlinedIcon /></span>
                     <h3>Profile</h3>
-                </a>
-                <a 
-                    className={`menu-item ${activeMenu === 'Tags' ? 'active' : ''}`} 
-                    onClick={() => handleMenuClick('Tags')}
+                </Link>
+                <Link 
+                    className={`menu-item ${activeMenu === '/tags' ? 'active' : ''}`} 
+                    to="/tags"
                 >
                     <span className="ml-4"><BookmarkBorderOutlinedIcon /></span>
                     <h3>Tags</h3>
-                </a>
+                </Link>
             </div>
             <label className="btn btn-primary" htmlFor="create-post">Create Post</label>
         </div>
