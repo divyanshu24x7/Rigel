@@ -117,38 +117,6 @@ app.put('/messages/:id/seen', authenticateToken, async (req, res) => {
     }
 });
 
-// app.get('/messages/:position', authenticateToken, async (req, res) => {
-//     try {
-//         const position = parseInt(req.params.position);
-//         const userId = req.user.userId;
-
-//         if (isNaN(position) || position < 0) {
-//             return res.status(400).json({ message: 'Invalid position value.' });
-//         }
-
-//         const posts = await Message.find({})
-//             .sort({ createdAt: -1 })
-//             .skip(position)
-//             .limit(1);
-
-//         if (posts.length > 0) {
-//             const post = posts[0];
-
-//             // // Mark the post as seen by the current user
-//             // await Message.findByIdAndUpdate(post._id, {
-//             //     $set: { [`seenBy.${userId}`]: true }
-//             // });
-
-//             res.status(200).json(post);
-//         } else {
-//             res.status(404).json({ message: 'No more posts available.' });
-//         }
-//     } catch (error) {
-//         console.error('Error fetching post:', error);
-//         res.status(500).json({ message: 'An error occurred while fetching the post.' });
-//     }
-// });
-
 app.get('/messages/:position', authenticateToken, async (req, res) => {
     try {
         const position = parseInt(req.params.position);

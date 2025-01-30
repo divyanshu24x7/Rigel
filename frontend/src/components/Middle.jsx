@@ -12,46 +12,32 @@ const Middle = () => {
     const [currentPostIndex, setCurrentPostIndex] = useState(0); // Track the current post index
     const [currentPost, setCurrentPost] = useState(null); // Store the current post data
 
-    // Function to fetch a post by its position
-    // const fetchPost = async (index) => {
-    //     try {
-    //         const response = await fetch(`http://localhost:5000/messages/${index}`);
-    //         if (response.ok) {
-    //             const data = await response.json();
-    //             setCurrentPost(data); // Update the current post
-    //         } else {
-    //             console.log(await response.json()); // Log error message
-    //         }
-    //     } catch (error) {
-    //         console.error('Error fetching post:', error);
-    //     }
-    // };
-
     const fetchPost = async (index) => {
         try {
             const token = localStorage.getItem('accessToken');
             const response = await fetch(`http://localhost:5000/messages/${index}`, {
-                headers: {
-                    'authorization': `Bearer ${token}`,
-                },
+                headers: { 'authorization': `Bearer ${token}` },
             });
-    
             if (response.ok) {
                 const data = await response.json();
                 setCurrentPost(data);
-    
-                // Mark the post as seen
-                await fetch(`http://localhost:5000/messages/${data._id}/seen`, {
-                    method: 'PUT',
-                    headers: {
-                        'authorization': `Bearer ${token}`,
-                    },
-                });
             } else {
                 console.error(await response.json());
             }
         } catch (error) {
             console.error('Error fetching post:', error);
+        }
+    };
+
+    const markPostAsSeen = async (postId) => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            await fetch(`http://localhost:5000/messages/${postId}/seen`, {
+                method: 'PUT',
+                headers: { 'authorization': `Bearer ${token}` },
+            });
+        } catch (error) {
+            console.error('Error marking post as seen:', error);
         }
     };
     
@@ -61,15 +47,13 @@ const Middle = () => {
         fetchPost(0);
     }, []);
 
-    // Handle "Next" button click
-    const handleNext = () => {
-        const token = localStorage.getItem('accessToken');
-        setCurrentPostIndex((prevIndex) => {
-            const newIndex = prevIndex + 1;
-            fetchPost(newIndex); // Fetch the next post
-            console.log(currentPost.image);
-            return newIndex;
-        });
+    const handleNext = async () => {
+        if (currentPost) {
+            await markPostAsSeen(currentPost._id); // Mark the current post as seen
+        }
+        const newIndex = currentPostIndex + 1;
+        setCurrentPostIndex(newIndex);
+        fetchPost(newIndex); // Fetch the next post
     };
 
     const handleInput = (event) => {
