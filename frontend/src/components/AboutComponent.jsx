@@ -5,6 +5,7 @@ const AboutComponent = () => {
     <div className="middle">
       <div className="feeds">
         <div className="feed">
+        <div className="p-4 border rounded-xl">
           <h1 className="text-3xl font-bold mb-4">About</h1>
           <p className="text-base text-gray-600 mb-6">
             Welcome to Rigel, where meaningful connections are formed through creativity and self-expression. Inspired by platforms like Tinder and Omegle, Rigel combines the spontaneity of discovery with the thoughtful engagement of social sharing.
@@ -27,6 +28,7 @@ const AboutComponent = () => {
           <p className="text-base text-gray-600">
             Join Rigel, write your post, and connect with people who resonate with your vibe. Whether you're looking for friendships, inspiration, or just a good conversation, Rigel has something for everyone.
           </p>
+          </div>
         </div>
       </div>
     </div>

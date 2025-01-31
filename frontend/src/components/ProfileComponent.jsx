@@ -1,22 +1,54 @@
-import React, { useState } from 'react';
-import profilePic from '../assets/profile-pic.png';
+// ProfileComponent.jsx
+import React, { useEffect, useState } from "react";
+import profilePic from "../assets/profile-pic.png";
 
 const ProfileComponent = () => {
   const [profilePicture, setProfilePicture] = useState(profilePic);
-  const [username, setUsername] = useState('JohnDoe');
-  const [bio, setBio] = useState('Just a mysterious internet wanderer.');
-  const [preferredTags, setPreferredTags] = useState(['Tech', 'Anime', 'Music']);
-  const [notPreferredTags, setNotPreferredTags] = useState(['Politics', 'Drama']);
-  const [searchTag, setSearchTag] = useState('');
+  const [username, setUsername] = useState("Loading...");
+  const [bio, setBio] = useState("");
+  const [preferredTags, setPreferredTags] = useState([]);
+  const [notPreferredTags, setNotPreferredTags] = useState([]);
+  const [searchTag, setSearchTag] = useState("");
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        const response = await fetch("http://localhost:5000/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUsername(data.username || "Anonymous");
+          setBio(data.bio || "This user has not added a bio.");
+          setPreferredTags(data.preferredTags || []);
+          setNotPreferredTags(data.notPreferredTags || []);
+          if (data.profilePicture) setProfilePicture(data.profilePicture);
+        } else {
+          console.error("Failed to fetch profile data");
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const handleTagRemove = (tagList, setTagList, tagToRemove) => {
-    setTagList(tagList.filter(tag => tag !== tagToRemove));
+    setTagList(tagList.filter((tag) => tag !== tagToRemove));
   };
 
   const handleTagAdd = (tagList, setTagList) => {
     if (searchTag && !tagList.includes(searchTag)) {
       setTagList([...tagList, searchTag]);
-      setSearchTag('');
+      setSearchTag("");
     }
   };
 
@@ -26,7 +58,7 @@ const ProfileComponent = () => {
         <div className="feed">
           <div className="p-4 border rounded-xl">
             <h2 className="text-xl font-bold mb-4">Profile Settings</h2>
-            
+
             {/* Profile Picture */}
             <div className="mb-4">
               <img
@@ -71,7 +103,10 @@ const ProfileComponent = () => {
               <h3 className="font-semibold">Preferred Tags:</h3>
               <div className="flex gap-2 mt-2 flex-wrap">
                 {preferredTags.map((tag, index) => (
-                  <div key={index} className="bg-blue-200 text-blue-800 rounded-full px-4 py-1 flex items-center">
+                  <div
+                    key={index}
+                    className="bg-blue-200 text-blue-800 rounded-full px-4 py-1 flex items-center"
+                  >
                     {tag}
                     <button
                       className="ml-2 text-sm font-bold text-red-500"
@@ -103,7 +138,10 @@ const ProfileComponent = () => {
               <h3 className="font-semibold">Not Preferred Tags:</h3>
               <div className="flex gap-2 mt-2 flex-wrap">
                 {notPreferredTags.map((tag, index) => (
-                  <div key={index} className="bg-red-200 text-red-800 rounded-full px-4 py-1 flex items-center">
+                  <div
+                    key={index}
+                    className="bg-red-200 text-red-800 rounded-full px-4 py-1 flex items-center"
+                  >
                     {tag}
                     <button
                       className="ml-2 text-sm font-bold text-red-500"
@@ -137,3 +175,4 @@ const ProfileComponent = () => {
 };
 
 export default ProfileComponent;
+

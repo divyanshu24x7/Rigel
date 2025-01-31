@@ -237,6 +237,51 @@ app.post(
     }
 );
 
+// app.get('/user/:id', async (req, res) => {
+//     try {
+//       const userId = req.params.id;
+//       const user = await User.findById(userId);
+  
+//       if (!user) {
+//         return res.status(404).json({ message: 'User not found' });
+//       }
+  
+//       const userProfile = {
+//         profilePicture: user.profilePic || null,
+//         username: user.username || 'Anonymous',
+//         bio: user.bio || 'No bio available.',
+//         preferredTags: user.preferredTags || [],
+//         notPreferredTags: user.notPreferredTags || []
+//       };
+  
+//       res.status(200).json(userProfile);
+//     } catch (error) {
+//       console.error('Error fetching user profile:', error);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//     }
+//   });
+
+// Sample server route for fetching profile data
+// Express.js backend (server.js)
+
+app.get("/profile", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user.userId; // Extracted from token in middleware
+      const userProfile = await User.findById(userId);
+      if (!userProfile) return res.status(404).json({ message: "User not found" });
+  
+      res.json({
+        username: userProfile.username,
+        bio: userProfile.bio || null,
+        profilePicture: userProfile.profilePicture || null,
+        preferredTags: userProfile.preferredTags || [],
+        notPreferredTags: userProfile.notPreferredTags || [],
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
 
 // Serve static files from the `uploads` directory
 app.use("/uploads", express.static("uploads"));
