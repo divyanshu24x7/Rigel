@@ -33,9 +33,9 @@ const tagSchema = new mongoose.Schema({
 tagSchema.index({ frequency: -1 });
 
 // Middleware to update timestamps
-tagSchema.pre('save', function (next) {
+tagSchema.pre("save", function (next) {
   this.updatedAt = Date.now(); // Automatically update `updatedAt`
-  if (this.isModified('frequency')) {
+  if (this.isModified("frequency")) {
     this.lastUsed = Date.now(); // Update `lastUsed` if frequency changes
   }
   next();
@@ -45,4 +45,4 @@ tagSchema.pre('save', function (next) {
 
 // module.exports = Tag;
 
-export default mongoose.model("Tags",tagSchema)
+export default mongoose.model("Tags", tagSchema);

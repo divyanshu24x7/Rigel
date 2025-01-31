@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 import profilePic from "../assets/profile-pic.png";
 
 const ProfileComponent = () => {
-  const [profilePicture, setProfilePicture] = useState(profilePic);
+  const [profilePicture, setProfilePicture] = useState("profilePicture");
   const [username, setUsername] = useState("Loading...");
   const [bio, setBio] = useState("");
   const [preferredTags, setPreferredTags] = useState([]);
   const [notPreferredTags, setNotPreferredTags] = useState([]);
   const [searchTag, setSearchTag] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [showSaveButton, setShowSaveButton] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -29,7 +31,7 @@ const ProfileComponent = () => {
           setBio(data.bio || "This user has not added a bio.");
           setPreferredTags(data.preferredTags || []);
           setNotPreferredTags(data.notPreferredTags || []);
-          if (data.profilePicture) setProfilePicture(data.profilePicture);
+          setProfilePicture(data.profilePicture);
         } else {
           console.error("Failed to fetch profile data");
         }
@@ -40,6 +42,42 @@ const ProfileComponent = () => {
 
     fetchProfileData();
   }, []);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setProfilePicture(URL.createObjectURL(file));
+      setShowSaveButton(true);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append("profilePic", selectedFile);
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch("http://localhost:5000/upload-profile-pic", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProfilePicture(data.profilePicture);
+        setShowSaveButton(false);
+        alert("Profile picture updated!");
+      } else {
+        console.error("Failed to upload profile picture");
+      }
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+    }
+  };
 
   const handleTagRemove = (tagList, setTagList, tagToRemove) => {
     setTagList(tagList.filter((tag) => tag !== tagToRemove));
@@ -62,7 +100,7 @@ const ProfileComponent = () => {
             {/* Profile Picture */}
             <div className="mb-4">
               <img
-                src={profilePicture}
+                src={`http://localhost:5000${profilePicture}`}
                 alt="Profile"
                 className="w-32 h-32 rounded-full object-cover mb-2"
               />
@@ -70,11 +108,16 @@ const ProfileComponent = () => {
                 type="file"
                 accept="image/*"
                 className="mt-2"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) setProfilePicture(URL.createObjectURL(file));
-                }}
+                onChange={handleImageChange}
               />
+              {showSaveButton && (
+                <button
+                  onClick={handleImageUpload}
+                  className="p-2 bg-green-500 text-white rounded-md mt-2"
+                >
+                  Save
+                </button>
+              )}
             </div>
 
             {/* Username */}
@@ -110,7 +153,9 @@ const ProfileComponent = () => {
                     {tag}
                     <button
                       className="ml-2 text-sm font-bold text-red-500"
-                      onClick={() => handleTagRemove(preferredTags, setPreferredTags, tag)}
+                      onClick={() =>
+                        handleTagRemove(preferredTags, setPreferredTags, tag)
+                      }
                     >
                       &#x2715;
                     </button>
@@ -145,7 +190,13 @@ const ProfileComponent = () => {
                     {tag}
                     <button
                       className="ml-2 text-sm font-bold text-red-500"
-                      onClick={() => handleTagRemove(notPreferredTags, setNotPreferredTags, tag)}
+                      onClick={() =>
+                        handleTagRemove(
+                          notPreferredTags,
+                          setNotPreferredTags,
+                          tag
+                        )
+                      }
                     >
                       &#x2715;
                     </button>
@@ -160,7 +211,9 @@ const ProfileComponent = () => {
                   className="p-2 border border-gray-300 rounded-md flex-1"
                 />
                 <button
-                  onClick={() => handleTagAdd(notPreferredTags, setNotPreferredTags)}
+                  onClick={() =>
+                    handleTagAdd(notPreferredTags, setNotPreferredTags)
+                  }
                   className="p-2 bg-red-500 text-white rounded-md"
                 >
                   +
@@ -175,4 +228,3 @@ const ProfileComponent = () => {
 };
 
 export default ProfileComponent;
-
