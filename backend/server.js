@@ -206,12 +206,10 @@ app.post(
 
       // Validate input
       if (!content || !tags || !Array.isArray(tags) || tags.length === 0) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Invalid input. Message content and at least one tag are required.",
-          });
+        return res.status(400).json({
+          error:
+            "Invalid input. Message content and at least one tag are required.",
+        });
       }
 
       // Process tags: normalize and update frequency in Tag collection
@@ -264,23 +262,23 @@ app.get("/profile", authenticateToken, async (req, res) => {
 });
 
 app.get("/profile/:id", authenticateToken, async (req, res) => {
-    try {
-      const userId = req.params.id; // Extracted from token in middleware
-      const userProfile = await User.findById(userId);
-      if (!userProfile)
-        return res.status(404).json({ message: "User not found" });
-  
-      res.json({
-        username: userProfile.username,
-        bio: userProfile.bio || null,
-        profilePicture: userProfile.profilePic || null,
-        preferredTags: userProfile.preferredTags || [],
-        notPreferredTags: userProfile.notPreferredTags || [],
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+  try {
+    const userId = req.params.id; // Extracted from token in middleware
+    const userProfile = await User.findById(userId);
+    if (!userProfile)
+      return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      username: userProfile.username,
+      bio: userProfile.bio || null,
+      profilePicture: userProfile.profilePic || null,
+      preferredTags: userProfile.preferredTags || [],
+      notPreferredTags: userProfile.notPreferredTags || [],
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 const uploadDir = "uploads/profile_pics/";
 if (!fs.existsSync(uploadDir)) {
@@ -345,6 +343,96 @@ app.post(
     }
   }
 );
+
+// In server.js, after the other app.get() routes (or in a suitable location)
+app.put("/profile", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { bio } = req.body; // Get the new bio from the request body
+
+    // Update the user's bio in MongoDB
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { bio },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Bio updated successfully",
+      bio: updatedUser.bio,
+    });
+  } catch (error) {
+    console.error("Error updating bio:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// In server.js, after the other /profile routes (or in a suitable location)
+app.put("/profile/username", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { username } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ error: "Username is required" });
+    }
+
+    // Check if the username already exists for a different user
+    const existingUser = await User.findOne({ username: username.trim() });
+    if (existingUser && existingUser._id.toString() !== userId) {
+      return res.status(409).json({ error: "Username already exists" });
+    }
+
+    // Update the username
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { username: username.trim() },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Username updated successfully",
+      username: updatedUser.username,
+    });
+  } catch (error) {
+    console.error("Error updating username:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.put("/profile/tags", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { preferredTags, notPreferredTags } = req.body; // Expect both arrays
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { preferredTags, notPreferredTags },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Tags updated successfully",
+      preferredTags: updatedUser.preferredTags,
+      notPreferredTags: updatedUser.notPreferredTags,
+    });
+  } catch (error) {
+    console.error("Error updating tags:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 // Serve static files from the `uploads` directory
 app.use("/uploads", express.static("uploads"));
