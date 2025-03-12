@@ -10,6 +10,8 @@ import User from "./models/User.js"; // Import User model
 import multer from "multer"; // Import Multer
 import path from "path"; // For handling file paths
 import fs from "fs";
+import Conversation from "./models/Conversation.js";
+import Chat from "./models/Chat.js";
 
 const app = express();
 dotenv.config();
@@ -433,6 +435,113 @@ app.put("/profile/tags", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// Fetch all conversations for the logged-in user
+// app.get("/conversations", authenticateToken, async (req, res) => {
+//   try {
+//     const userId = req.user.userId;
+//     // Find conversations where the current user is a participant,
+//     // and sort by the most recently updated conversation.
+//     const conversations = await Conversation.find({
+//       participants: userId
+//     }).sort({ updatedAt: -1 });
+//     res.status(200).json(conversations);
+//   } catch (error) {
+//     console.error("Error fetching conversations", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
+// Fetch chats (messages) for a specific conversation
+app.get("/conversations/:id/chats", authenticateToken, async (req, res) => {
+  try {
+    const conversationId = req.params.id;
+    // Optionally, you could check here that the user is part of the conversation.
+    const chats = await Chat.find({ conversationId }).sort({ createdAt: 1 });
+    res.status(200).json(chats);
+  } catch (error) {
+    console.error("Error fetching chats", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// In server.js or your chat routes file
+app.post("/conversations/init", authenticateToken, async (req, res) => {
+  try {
+    const senderId = req.user.userId;
+    const { receiverId } = req.body;
+
+    if (!receiverId) {
+      return res.status(400).json({ error: "Receiver ID is required" });
+    }
+
+    // Check if a conversation between the two users already exists
+    let conversation = await Conversation.findOne({
+      participants: { $all: [senderId, receiverId] },
+    });
+
+    if (!conversation) {
+      conversation = new Conversation({
+        participants: [senderId, receiverId],
+      });
+      await conversation.save();
+    }
+
+    res.status(201).json(conversation);
+  } catch (error) {
+    console.error("Error initiating conversation:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Fetch all conversations for the logged-in user, with populated participant info
+app.get("/conversations", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const conversations = await Conversation.find({
+      participants: userId,
+    })
+      .sort({ updatedAt: -1 })
+      .populate("participants", "username profilePic"); // populate username & profilePic
+    res.status(200).json(conversations);
+  } catch (error) {
+    console.error("Error fetching conversations", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Send a message in an existing conversation
+app.post("/conversations/:id/chats", authenticateToken, async (req, res) => {
+  try {
+    const conversationId = req.params.id;
+    const senderId = req.user.userId;
+    const { content } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({ error: "Message content is required" });
+    }
+
+    // Create a new chat message
+    const chat = new Chat({
+      conversationId,
+      sender: senderId,
+      content,
+      readBy: [senderId],
+    });
+    await chat.save();
+
+    // Update conversation's last message information
+    await Conversation.findByIdAndUpdate(conversationId, {
+      lastMessage: { content, timestamp: new Date() },
+    });
+
+    res.status(201).json(chat);
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 // Serve static files from the `uploads` directory
 app.use("/uploads", express.static("uploads"));

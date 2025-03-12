@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
-import profilepic from "../assets/profile-pic.png";
+// import profilepic from "../assets/profile-pic.png";
 import AttachmentOutlinedIcon from "@mui/icons-material/AttachmentOutlined";
+// import ReplyModal from "./ReplyModal"; // Import the modal component
+import { useNavigate } from "react-router-dom";
 
 const Middle = () => {
   const [profilePicture, setProfilePicture] = useState("profilePicture");
@@ -15,6 +17,40 @@ const Middle = () => {
   const fileInputRef = useRef(null); // Reference for hidden file input
   const [currentPostIndex, setCurrentPostIndex] = useState(0); // Track the current post index
   const [currentPost, setCurrentPost] = useState(null); // Store the current post data
+  // const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+ // Inside Middle.jsx
+ const handleInitiateConversation = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    const response = await fetch("http://localhost:5000/conversations/init", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        receiverId: authorId, // The post's author becomes the receiver
+      }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Conversation created or already exists:", data);
+      // Redirect to the messages page (which will load and display the conversation)
+      navigate("/messages");
+    } else {
+      const errorData = await response.json();
+      console.error("Error initiating conversation:", errorData);
+      alert(errorData.error || "Failed to initiate conversation");
+    }
+  } catch (error) {
+    console.error("Error initiating conversation:", error);
+  }
+};
+
+
+
 
   const fetchProfileData = async () => {
     try {
@@ -331,7 +367,7 @@ const Middle = () => {
                 </div>
               </div>
               <div className="reply-next-buttons flex gap-2 ml-auto">
-                <button className="btn btn-primary">Reply</button>
+                <button className="btn btn-primary" onClick={handleInitiateConversation}>Reply</button>
                 <button className="btn btn-primary" onClick={handleNext}>
                   Next
                 </button>
