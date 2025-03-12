@@ -13,6 +13,9 @@ import fs from "fs";
 import Conversation from "./models/Conversation.js";
 import Chat from "./models/Chat.js";
 
+import http from "http"; // Import Node's HTTP module
+import { Server as SocketIOServer } from "socket.io"; // Import socket.io
+
 const app = express();
 dotenv.config();
 const PORT = process.env.PORT || 5000;
@@ -50,6 +53,37 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+const server = http.createServer(app); // Create HTTP server with Express app
+
+// Initialize Socket.IO and attach it to the HTTP server
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: "http://localhost:3000", // Your client origin
+  },
+});
+
+// Socket.IO connection handling
+io.on("connection", (socket) => {
+  console.log("New client connected: ", socket.id);
+
+  // Join conversation room
+  socket.on("joinConversation", (conversationId) => {
+    socket.join(conversationId);
+    console.log(`Socket ${socket.id} joined conversation ${conversationId}`);
+  });
+
+  // Leave conversation room
+  socket.on("leaveConversation", (conversationId) => {
+    socket.leave(conversationId);
+    console.log(`Socket ${socket.id} left conversation ${conversationId}`);
+  });
+
+  // Disconnect
+  socket.on("disconnect", () => {
+    console.log("Client disconnected: ", socket.id);
+  });
+});
 
 async function handleTags(tags) {
   try {
@@ -436,22 +470,6 @@ app.put("/profile/tags", authenticateToken, async (req, res) => {
   }
 });
 
-// Fetch all conversations for the logged-in user
-// app.get("/conversations", authenticateToken, async (req, res) => {
-//   try {
-//     const userId = req.user.userId;
-//     // Find conversations where the current user is a participant,
-//     // and sort by the most recently updated conversation.
-//     const conversations = await Conversation.find({
-//       participants: userId
-//     }).sort({ updatedAt: -1 });
-//     res.status(200).json(conversations);
-//   } catch (error) {
-//     console.error("Error fetching conversations", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
-
 // Fetch chats (messages) for a specific conversation
 app.get("/conversations/:id/chats", authenticateToken, async (req, res) => {
   try {
@@ -511,6 +529,38 @@ app.get("/conversations", authenticateToken, async (req, res) => {
 });
 
 // Send a message in an existing conversation
+// app.post("/conversations/:id/chats", authenticateToken, async (req, res) => {
+//   try {
+//     const conversationId = req.params.id;
+//     const senderId = req.user.userId;
+//     const { content } = req.body;
+    
+//     if (!content) {
+//       return res.status(400).json({ error: "Message content is required" });
+//     }
+
+//     // Create a new chat message
+//     const chat = new Chat({
+//       conversationId,
+//       sender: senderId,
+//       content,
+//       readBy: [senderId],
+//     });
+//     await chat.save();
+
+//     // Update conversation's last message information
+//     await Conversation.findByIdAndUpdate(conversationId, {
+//       lastMessage: { content, timestamp: new Date() },
+//     });
+
+//     res.status(201).json(chat);
+//   } catch (error) {
+//     console.error("Error sending message:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
+// Example: In your POST /conversations/:id/chats endpoint, emit a new message event
 app.post("/conversations/:id/chats", authenticateToken, async (req, res) => {
   try {
     const conversationId = req.params.id;
@@ -535,6 +585,9 @@ app.post("/conversations/:id/chats", authenticateToken, async (req, res) => {
       lastMessage: { content, timestamp: new Date() },
     });
 
+    // Emit new message event to all clients in this conversation's room
+    io.to(conversationId).emit("newMessage", chat);
+
     res.status(201).json(chat);
   } catch (error) {
     console.error("Error sending message:", error);
@@ -550,6 +603,9 @@ app.use("/profile_pics", express.static("profile_pics"));
 
 app.use(express.urlencoded({ extended: true }));
 
-app.listen(PORT, () => {
+// app.listen(PORT, () => {
+//   console.log("Server running on port:" + PORT);
+// });
+server.listen(PORT, () => {
   console.log("Server running on port:" + PORT);
 });

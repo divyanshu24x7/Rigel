@@ -1,5 +1,12 @@
 // MessagesComponent.jsx
 import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+
+// Establish a socket connection (this could be moved to a separate module)
+// const socket = io("http://localhost:5000");
+const socket = io("http://localhost:5000", {
+  transports: ["websocket"], // Force WebSocket transport only
+});
 
 const MessagesComponent = () => {
   const [conversations, setConversations] = useState([]);
@@ -9,6 +16,12 @@ const MessagesComponent = () => {
 
   // Fetch conversations when the component mounts
   useEffect(() => {
+
+  /**
+   * Fetches conversations for the logged-in user from the server.
+   * If conversations are successfully fetched, updates `conversations` state.
+   * If there is at least one conversation, selects the first one by default.
+   */
     const fetchConversations = async () => {
       try {
         const token = localStorage.getItem("accessToken");
@@ -57,13 +70,43 @@ const MessagesComponent = () => {
     fetchChats();
   }, [selectedConversation]);
 
+  // Join and leave a conversation room based on selection
+  useEffect(() => {
+    if (selectedConversation) {
+      socket.emit("joinConversation", selectedConversation._id);
+    }
+    return () => {
+      if (selectedConversation) {
+        socket.emit("leaveConversation", selectedConversation._id);
+      }
+    };
+  }, [selectedConversation]);
+
+  // Listen for new messages from Socket.IO
+  useEffect(() => {
+    const handleNewMessage = (message) => {
+      // Ensure the incoming message is for the currently selected conversation
+      if (
+        selectedConversation &&
+        message.conversationId === selectedConversation._id
+      ) {
+        setChats((prevChats) => [...prevChats, message]);
+      }
+    };
+
+    socket.on("newMessage", handleNewMessage);
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+    };
+  }, [selectedConversation]);
+
   const handleConversationClick = (conv) => {
     setSelectedConversation(conv);
   };
 
-  // Handle sending a new message
+  // Handle sending a new message via HTTP (which will also trigger a socket event on the server)
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedConversation) return;
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch(
@@ -78,9 +121,7 @@ const MessagesComponent = () => {
         }
       );
       if (response.ok) {
-        const data = await response.json();
-        // Append the new message to the chat list
-        setChats((prevChats) => [...prevChats, data]);
+        // No need to update chats here as the socket event will do it.
         setNewMessage("");
       } else {
         const errorData = await response.json();
@@ -91,7 +132,7 @@ const MessagesComponent = () => {
       console.error("Error sending message:", error);
     }
   };
-
+  
   // Assume currentUserId is stored in local storage
   const currentUserId = localStorage.getItem("userId");
 
@@ -105,7 +146,7 @@ const MessagesComponent = () => {
         ) : (
           <ul>
             {conversations.map((conv) => {
-              // Find the other participant
+              // Find the other participant by converting ObjectId to string
               const otherUser = conv.participants.find(
                 (p) => p._id.toString() !== currentUserId
               );
