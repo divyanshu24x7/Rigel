@@ -24,6 +24,9 @@ const Middle = () => {
  const handleInitiateConversation = async () => {
   try {
     const token = localStorage.getItem("accessToken");
+    if (currentPost) {
+      await markPostAsSeen(currentPost._id); // Mark the current post as seen
+    }
     const response = await fetch("http://localhost:5000/conversations/init", {
       method: "POST",
       headers: {
