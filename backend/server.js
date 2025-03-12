@@ -280,7 +280,7 @@ app.get("/profile/:id", authenticateToken, async (req, res) => {
   }
 });
 
-const uploadDir = "uploads/profile_pics/";
+const uploadDir = "profile_pics/";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
