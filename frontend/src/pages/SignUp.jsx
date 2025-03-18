@@ -67,9 +67,9 @@ const SignUp = () => {
                 </form>
             </div>
             {/*introduction*/}
-            <div className='flex flex-col w-full justify-center items-center'>
-                <h1 className='text-9xl'>Hello!</h1>
-                <h1 className='text-9xl'>Friend.</h1>
+            <div className='hidden md:flex flex-col w-full justify-center items-center'>
+                <h1 className='text-9xl'>Create an</h1>
+                <h1 className='text-9xl'>account.</h1>
             </div>
         </div>
     )

@@ -69,7 +69,7 @@ const Login = () => {
                 </form>
             </div>
             {/*introduction*/}
-            <div className='flex flex-col w-full justify-center items-center'>
+            <div className='hidden md:flex flex-col w-full justify-center items-center'>
                 <h1 className='text-9xl'>Welcome</h1>
                 <h1 className='text-9xl'>Back.</h1>
             </div>
