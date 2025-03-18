@@ -455,3 +455,20 @@ MEDIA QUERIES FOR SMALL TABLETS AND MOBILE PHONES
         display: none;
     }
 }
+
+/* login and signup*/
+.signup-background{
+    background: var(--color-light) ;
+}
+
+.signup-left{
+    background: var(--color-primary);
+}
+ 
+.signup-input{
+    background: var(--color-secondary);
+}
+
+.signup-btn{
+    background: var(--color-grey);
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -32,7 +33,13 @@ const Login = () => {
 
             } else {
                 // Handle login failure (e.g., show error message)
-                alert(data.message || 'Invalid email or password');
+                //alert(data.message || 'Invalid email or password');
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'Okay'
+                })
             }
         } catch (error) {
             console.error('Error:', error);
@@ -40,35 +47,31 @@ const Login = () => {
         }
     };
     return (
-        <div className='container mx-auto items-center flex flex-col'>
-            <h1 className='text-white text-4xl p-12'>Welcome back</h1>
-            <form className='flex flex-col w-full items-center' onSubmit={handleLogin}> {/* Form submission */}
-                <input
-                    type='text'
-                    placeholder='Email'
-                    className='w-[50%] md:w-[30%] p-3 mb-3 border rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:border-red-700'
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)} // Set email state
-                />
-                <input
-                    type='password'
-                    placeholder='Password'
-                    className='w-[50%] md:w-[30%] p-3 mb-3 border rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:border-red-700'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)} // Set password state
-                />
-                <button
-                    type='submit' // Button submits the form
-                    className='text-white bg-red-800 w-[50%] md:w-[30%] p-3 rounded-md'
-                >
-                    Log In
-                </button>
-            </form>
-            <div className='flex my-3'>
-                <p className='text-white'>Don't have an account? </p>
-                <Link to='/auth/SignUp' className='text-red-800 hover:text-red-700 ml-3'>
-                    Sign Up
-                </Link>
+        <div className='flex h-screen signup-background '>
+            {/*sidebar*/}
+            <div className='signup-left w-[516px] p-12 flex flex-col justify-center'>
+                <h1 className='text-white text-3xl'>Rigel</h1>
+                <h2 className='text-white text-lg font-bold mt-8'>Login to your account</h2>
+                <p className='text-sm text-zinc-300 mt-0.5'>Don't have an account? <Link to="/auth/SignUp" className='text-violet-950 font-bold underline'>Sign Up</Link> for one</p>
+                <form onSubmit={handleLogin}>
+                    <div className='mt-8'>
+                        <label htmlFor="" className='text-zinc-300 text-sm font-normal block mb-0.5'>Email address</label>
+                        <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder='you@example.com' type="email" className='block w-full signup-input rounded text-violet-950 px-4 py-2 text-sm' />
+                    </div>
+                    <div className='mt-6'>
+                        <label htmlFor="" className='text-zinc-300 text-sm font-normal block mb-0.5'>Password</label>
+                        <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder='***************' type="password" className='block w-full signup-input rounded text-violet-950 px-4 py-2 text-sm' />
+                    </div>
+
+                    <div>
+                        <button className='w-full mt-4 bg-violet-950 rounded-full px-4 py-2 text-sm font-bold text-white'>Login</button>
+                    </div>
+                </form>
+            </div>
+            {/*introduction*/}
+            <div className='flex flex-col w-full justify-center items-center'>
+                <h1 className='text-9xl'>Welcome</h1>
+                <h1 className='text-9xl'>Back.</h1>
             </div>
         </div>
     )
