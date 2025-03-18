@@ -136,8 +136,14 @@ const Middle = () => {
   useEffect(() => {
     fetchProfileData();
     fetchPost(0);
-    fetchAuthorData(); // Fetch author data when the component mounts
+    // Remove fetchAuthorData() from here
   }, []);
+  
+  useEffect(() => {
+    if (!authorId) return;
+    fetchAuthorData();
+  }, [authorId]);
+  
 
   const handleNext = async () => {
     if (currentPost) {
