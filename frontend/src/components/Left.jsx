@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import profilepic from "../assets/profile-pic.png";
 import HomeIcon from "@mui/icons-material/Home";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
@@ -12,6 +12,7 @@ const Left = () => {
   const [username, setUsername] = useState("Loading...");
   const location = useLocation();
   const activeMenu = location.pathname;
+  const navigate = useNavigate();
 
   const fetchProfileData = async () => {
     try {
@@ -40,6 +41,26 @@ const Left = () => {
   useEffect(() => {
     fetchProfileData();
   }, []);
+
+  const handleCreatePost = () => {
+    if (activeMenu === "/") {
+      // We're on home page; focus the textarea directly
+      const textarea = document.getElementById("textarea");
+      if (textarea) {
+        textarea.focus();
+      }
+    } else {
+      // Redirect to home page and then focus on the textarea
+      navigate("/");
+      // Wait briefly for the home page to render
+      setTimeout(() => {
+        const textarea = document.getElementById("textarea");
+        if (textarea) {
+          textarea.focus();
+        }
+      }, 100);
+    }
+  };
 
   return (
     <div className="left">
@@ -100,9 +121,9 @@ const Left = () => {
           <h3>Tags</h3>
         </Link>
       </div>
-      <label className="btn btn-primary" htmlFor="create-post">
+      <button className="btn btn-primary" onClick={handleCreatePost}>
         Create Post
-      </label>
+      </button>
     </div>
   );
 };

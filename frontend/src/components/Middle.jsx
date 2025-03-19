@@ -252,6 +252,7 @@ const Middle = () => {
               value={inputText}
               onInput={handleInput}
               className="w-full mt-4 border-b-2 border-gray-300 px-3 py-2"
+              id="textarea"
             />
             <div className="flex flex-col">
               <div className="flex items-center">
