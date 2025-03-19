@@ -40,10 +40,10 @@ const Navbar = () => {
   return (
     <div className="container">
       <h2 className="logo text-3xl">Rigel</h2>
-      <div className="search-bar">
+      {/* <div className="search-bar">
         <SearchIcon />
         <input type="search" placeholder="Search for tags" />
-      </div>
+      </div> */}
       <div className="create">
         <label
           className="btn btn-primary"

@@ -119,6 +119,25 @@ app.get("/tags/top", async (req, res) => {
   }
 });
 
+app.get("/tags/search", async (req, res) => {
+  try {
+    const query = req.query.q;
+    if (!query) {
+      return res.status(400).json({ error: "Missing query parameter" });
+    }
+    // Create a case-insensitive regular expression for the search query
+    const regex = new RegExp(query, "i");
+    const matchingTags = await Tag.find({ name: regex })
+      .sort({ frequency: -1 })
+      .limit(20);
+    res.status(200).json(matchingTags);
+  } catch (error) {
+    console.error("Error searching tags:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 app.get("/messages", async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query; // Get page and limit from query params

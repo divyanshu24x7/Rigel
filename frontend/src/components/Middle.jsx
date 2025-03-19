@@ -297,7 +297,7 @@ const Middle = () => {
                 {tags.map((tag, index) => (
                   <div
                     key={index}
-                    className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm"
+                    className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm btn-primary"
                   >
                     <span>{tag}</span>
                     <button
