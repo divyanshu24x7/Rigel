@@ -1,2 +1,4 @@
 backend/uploads/
 backend/profile_pics/
+backend/node_modules/
+frontend/node_modules/
