@@ -292,7 +292,7 @@ This project is licensed under the GNU General Public License v2.0 License. See 
 
 ## Authors
 
-- **Karan Pratap Shaw** ([GitHub](https://github.com/iCaran))
+- **Debrupa Saha** ([GitHub](https://github.com/Debrupa-Saha))
 - **Divyanshu Kumar**
 
 ---
