@@ -181,35 +181,47 @@ app.get("/messages/:position", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "Invalid position value." });
     }
 
-    // Retrieve the user's document to get notPreferredTags.
+    // Retrieve the user's document so we can access preferred and not-preferred tags.
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
+    const preferredTags = user.preferredTags || [];
     const notPreferredTags = user.notPreferredTags || [];
 
-    // Filter out posts already seen by the user and posts with any not-preferred tag.
-    const unseenPosts = await Message.find({
-      [`seenBy.${userId}`]: { $exists: false },
-      tags: { $nin: notPreferredTags }
-    }).sort({ createdAt: -1 });
+    // Use an aggregation pipeline to:
+    // 1. Filter out posts already seen by the user and those with not-preferred tags.
+    // 2. Compute the number of matching preferred tags using $setIntersection.
+    // 3. Sort by the computed match count (descending) and then by creation date (descending).
+    const posts = await Message.aggregate([
+      {
+        $match: {
+          [`seenBy.${userId}`]: { $exists: false },
+          tags: { $nin: notPreferredTags }
+        }
+      },
+      {
+        $addFields: {
+          matchCount: { $size: { $setIntersection: ["$tags", preferredTags] } }
+        }
+      },
+      {
+        $sort: { matchCount: -1, createdAt: -1 }
+      }
+    ]);
 
-    if (position >= unseenPosts.length) {
-      return res
-        .status(404)
-        .json({ message: "No more unseen posts available." });
+    if (position >= posts.length) {
+      return res.status(404).json({ message: "No more unseen posts available." });
     }
 
-    // Get the post at the specified position
-    const post = unseenPosts[position];
-    res.status(200).json(post);
+    // Return the post at the specified position
+    res.status(200).json(posts[position]);
   } catch (error) {
     console.error("Error fetching post:", error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while fetching the post." });
+    res.status(500).json({ message: "An error occurred while fetching the post." });
   }
 });
+
 
 
 // Configure Multer for file uploads
