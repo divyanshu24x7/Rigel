@@ -50,6 +50,17 @@ const Right = () => {
         <div className="heading">
           <h4>Tags</h4>
         </div>
+        {/* Search bar with extra top margin */}
+        <div className="search-bar mt-4 flex items-center gap-2">
+          <SearchIcon />
+          <input
+            type="search"
+            placeholder="Search for tags"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="p-2 border rounded w-full"
+          />
+        </div>
         <div className="tags-container flex flex-wrap gap-2 p-2">
           {tags.length > 0 ? (
             tags.map((tag) => (
@@ -64,17 +75,7 @@ const Right = () => {
             <p className="text-gray-500">No tags available.</p>
           )}
         </div>
-        {/* Search bar with extra top margin */}
-        <div className="search-bar mt-4 flex items-center gap-2">
-          <SearchIcon />
-          <input
-            type="search"
-            placeholder="Search for tags"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="p-2 border rounded w-full"
-          />
-        </div>
+        
       </div>
     </div>
   );
