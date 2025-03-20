@@ -1,6 +1,6 @@
-# Mintaka – A Personalized Anime & Social Connection Platform
+# Rigel
 
-**Mintaka** is a dynamic web application that combines personalized anime recommendations with social interactions. Built with modern web technologies, it allows users to discover anime, interact through messaging, and express their interests via posts—while using cutting‑edge recommendation and tag filtering systems. **Note:** This project is a work in progress, and more features and refinements will be added in the future.
+Rigel is a full-stack social media platform designed to connect users through personalized content, real-time messaging, and robust profile management. This work-in-progress application leverages modern technologies such as React, Node.js, Express, MongoDB, and Socket.IO to deliver an engaging, real-time user experience with a focus on tag-based content filtering and interactive chats.
 
 ---
 
@@ -8,22 +8,13 @@
 
 - [Overview](#overview)
 - [Features](#features)
-- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Architecture & Data Models](#architecture--data-models)
 - [Installation & Setup](#installation--setup)
-- [Running the Application](#running-the-application)
-  - [Server-Side](#server-side)
-  - [Client-Side](#client-side)
-  - [Model Training Scripts](#model-training-scripts)
-- [Endpoints & API](#endpoints--api)
-- [Front-End Components](#front-end-components)
-  - [Left Component](#left-component)
-  - [Middle Component](#middle-component)
-  - [Right Component](#right-component)
-- [Real-Time Messaging](#real-time-messaging)
-- [Recommendation System](#recommendation-system)
-  - [Boost Matching Posts](#boost-matching-posts)
-- [Tag Management](#tag-management)
-- [Future Improvements](#future-improvements)
+- [Environment Variables](#environment-variables)
+- [API Endpoints](#api-endpoints)
+- [Folder Structure](#folder-structure)
+- [Known Issues & Future Improvements](#known-issues--future-improvements)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -31,241 +22,273 @@
 
 ## Overview
 
-Mintaka is designed to bring together users with a shared passion for anime. The platform provides personalized recommendations and allows users to create posts, chat in real time, and filter content based on their preferences. A sophisticated recommendation engine (initially implemented with Alternating Least Squares) boosts posts that match the user's preferred tags while filtering out content they dislike.
+Rigel is designed to be a dynamic and personalized social platform where users can:
+- Create and share posts enriched with images and tags.
+- Filter posts based on their preferred and disliked tags using MongoDB aggregations.
+- Manage their profiles, including bio, username, and tag preferences.
+- Engage in real-time conversations via an integrated messaging system that leverages Socket.IO.
+- Enjoy an evolving user experience that continuously adapts to their interests and social interactions.
+
+This project is a work in progress and is actively being developed and improved. The core concept is to build a platform that feels both personal and interactive, enabling users to not only consume content but also interact through real-time messaging and tag-based content curation.
 
 ---
 
 ## Features
 
-- **Personalized Anime Recommendations:**  
-  - Uses user rating data and tags to generate personalized anime recommendations.
-  - Boosts posts that match users’ preferred tags while filtering out not-preferred tags.
+- **User Profiles:**  
+  - Fetch, display, and update profile information (bio, username, profile picture).
+  - Manage preferred and not-preferred tags to influence content filtering.
 
-- **User Messaging System:**  
-  - Real-time messaging powered by Socket.IO.
-  - Supports conversations between users with notifications for new messages.
+- **Post Feed:**  
+  - Create posts with text, images, and tags.
+  - Filter posts using MongoDB aggregations based on user tag preferences.
+  - Mark posts as seen and handle pagination.
 
-- **Responsive Design:**  
-  - Fully responsive UI built with Tailwind CSS and custom styling.
-  - Components like Left, Middle, and Right adjust seamlessly on mobile, tablet, and desktop screens.
+- **Real-Time Messaging:**  
+  - Conversations are modeled using two collections: one for conversation metadata and another for individual chat messages.
+  - Real-time chat functionality implemented with Socket.IO.
+  - Conversation list displays the other party’s profile photo and username.
 
-- **Tag Management:**  
-  - Users can specify preferred and not-preferred tags.
-  - The system fetches top tags and supports real-time tag search.
-  - Future updates will also implement more advanced tag analytics.
+- **Tag Filtering:**  
+  - Posts are filtered based on the user’s liked (preferred) and disliked (not-preferred) tags.
+  - Utilizes MongoDB’s aggregation framework for efficient querying.
 
-- **Work in Progress:**  
-  - The project is continuously evolving. New features (e.g., enhanced user profiles, additional post interactions, further customization of recommendations) are planned.
+- **File Uploads:**  
+  - Image uploads for posts and profile pictures handled via Multer.
+  - Static serving of uploaded images from designated directories.
+
+- **Authentication & Authorization:**  
+  - JSON Web Tokens (JWT) used for secure authentication.
+  - Protected routes ensuring that only authorized users can access certain endpoints.
 
 ---
 
-## Architecture
+## Tech Stack
 
-### Back-End
+- **Frontend:**  
+  - **React** with functional components and hooks  
+  - **Vite** for fast development and bundling  
+  - **Tailwind CSS** for styling (or your preferred CSS framework)  
+  - **Socket.IO Client** for real-time messaging
 
-- **Node.js & Express:**  
-  - The server is built using Express, providing RESTful endpoints for user authentication, profile management, messaging, and recommendations.
-- **MongoDB & Mongoose:**  
-  - MongoDB stores user, post, and tag data. Mongoose models define the schema for users, messages, and tags.
-- **Socket.IO:**  
-  - Enables real-time messaging between users.
-- **Model Training:**  
-  - Python scripts (using libraries like `implicit` for ALS) handle model training and are scheduled to run periodically.
+- **Backend:**  
+  - **Node.js** with **Express** for building the REST API  
+  - **Socket.IO** for real-time WebSocket communication  
+  - **MongoDB** for data storage, using **Mongoose** for schema-based modeling  
+  - **JWT (jsonwebtoken)** for authentication  
+  - **Multer** for handling file uploads  
+  - **dotenv** for environment variable management
+
+---
+
+## Architecture & Data Models
+
+### **Data Models**
+
+1. **User:**  
+   Contains user credentials, profile information (username, bio, profilePic), tag preferences (preferredTags, notPreferredTags), and other metadata.
+
+2. **Post (Message):**  
+   Stores post content, associated tags, image URL, author reference, and a map of users who have seen the post.
+
+3. **Conversation:**  
+   Represents a conversation between two users. Contains:
+   - An array of participants (references to User documents).
+   - Last message summary (content and timestamp).
+
+4. **Chat:**  
+   Represents individual messages within a conversation. Contains:
+   - Reference to the Conversation document.
+   - Sender, message content, timestamp, and an optional list of users who have read the message.
+
+### **Architecture**
+
+- **Server:**  
+  The Express server is wrapped in an HTTP server and enhanced with Socket.IO for real-time communication. It handles API routes for authentication, profile management, posts, tag handling, and real-time chat messaging.
   
-### Front-End
+- **Client:**  
+  A React-based frontend communicates with the backend via REST endpoints for initial data fetching and uses Socket.IO for real-time updates in messaging.
 
-- **React:**  
-  - The client is built using React with React Router for navigation.
-- **Tailwind CSS:**  
-  - Custom responsive styles (including classes such as `middle`, `feeds`, and `feed`) ensure a fluid UI across devices.
-- **Material UI Icons:**  
-  - Icons from MUI are used throughout the app for a modern look and feel.
+- **Real-Time Messaging Flow:**  
+  When a user sends a chat message:
+  - The client makes a POST request to the `/conversations/:id/chats` endpoint.
+  - The server saves the message and emits a `newMessage` event via Socket.IO.
+  - Other clients in the same conversation room receive the event and update their UI in real time.
 
 ---
 
 ## Installation & Setup
 
+### **Prerequisites**
+
+- [Node.js](https://nodejs.org/) (v14+ recommended)
+- [MongoDB](https://www.mongodb.com/) installed and running
+- [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
+
+### **Backend Setup**
+
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/mintaka.git
-   cd mintaka
+   git clone https://github.com/yourusername/rigel.git
+   cd rigel
    ```
 
-2. **Install Server Dependencies:**
+2. **Install Dependencies:**
 
    ```bash
-   cd server
    npm install
    ```
 
-3. **Install Client Dependencies:**
+3. **Environment Variables:**
 
-   ```bash
-   cd ../client
-   npm install
-   ```
-
-4. **Set Up Environment Variables:**
-
-   Create a `.env` file in the server folder with the following variables:
+   Create a `.env` file in the root directory with the following variables:
 
    ```env
    PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/mintaka
-   JWT_SECRET=your_jwt_secret
+   MONGO_URI=mongodb://localhost:27017/rigel
+   ACCESS_TOKEN_SECRET=your_secret_key
    ```
 
-5. **Start MongoDB:**  
-   Ensure MongoDB is running locally or update `MONGODB_URI` to your database server.
+4. **Run the Server:**
+
+   ```bash
+   npm run start
+   ```
+
+   The server will start on `http://localhost:5000`.
+
+### **Frontend Setup**
+
+1. **Navigate to the Frontend Directory:**
+
+   ```bash
+   cd frontend
+   ```
+
+2. **Install Dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Run the Development Server:**
+
+   ```bash
+   npm run dev
+   ```
+
+   The frontend will be available on `http://localhost:3000`.
 
 ---
 
-## Running the Application
+## Environment Variables
 
-### Server-Side
+- **PORT:** The port on which the backend server runs.
+- **MONGO_URI:** MongoDB connection string.
+- **ACCESS_TOKEN_SECRET:** Secret key used for JWT authentication.
+- (Additional variables can be added as needed.)
 
-Start the Express server (from the server directory):
+---
 
-```bash
-npm start
+## API Endpoints
+
+Below is a brief overview of the main API endpoints:
+
+### **Authentication**
+- `POST /auth` – Handle user login and registration.
+
+### **Profile**
+- `GET /profile` – Fetch logged-in user’s profile.
+- `PUT /profile` – Update user bio.
+- `PUT /profile/username` – Update user username.
+- `PUT /profile/tags` – Update user’s preferred and not-preferred tags.
+- `GET /profile/:id` – Fetch profile of a specific user.
+- `POST /upload-profile-pic` – Upload and update profile picture.
+
+### **Posts / Messages**
+- `GET /messages` – Fetch posts with pagination.
+- `POST /messages` – Create a new post.
+- `PUT /messages/:id/seen` – Mark a post as seen.
+- `GET /messages/:position` – Fetch a specific post by position.
+
+### **Conversations & Chats**
+- `POST /conversations/init` – Initiate a conversation between users.
+- `GET /conversations` – Fetch all conversations for the logged-in user (with populated participant info).
+- `GET /conversations/:id/chats` – Fetch chat messages for a specific conversation.
+- `POST /conversations/:id/chats` – Send a chat message in a conversation (also emits a Socket.IO event).
+
+---
+
+## Folder Structure
+
+```
+rigel/
+├── backend/
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Messages.js
+│   │   ├── Tags.js
+│   │   ├── Conversation.js
+│   │   └── Chat.js
+│   ├── routes/
+│   │   └── auth.js
+│   ├── uploads/
+│   ├── profile_pics/
+│   ├── server.js
+│   ├── .env
+│   └── package.json
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   ├── ProfileComponent.jsx
+    │   │   ├── Middle.jsx
+    │   │   └── MessagesComponent.jsx
+    │   ├── App.jsx
+    │   └── index.jsx
+    ├── public/
+    ├── vite.config.js
+    └── package.json
 ```
 
-### Client-Side
-
-Start the React development server (from the client directory):
-
-```bash
-npm start
-```
-
-### Model Training Scripts
-
-The project uses two Python scripts for training recommendation models:
-
-- **anime_recommendation_train.py** – Trains the anime recommendation model.
-- **user_recommendation_train.py** – Trains the user similarity model.
-
-These scripts are scheduled to run every hour using `node-cron` (see the server’s `server.js` for details). You can also run them manually:
-
-```bash
-python scripts/anime_recommendation_train.py
-python scripts/user_recommendation_train.py
-```
-
 ---
 
-## Endpoints & API
+## Known Issues & Future Improvements
 
-### Authentication & Profile
+- **Real-Time Messaging:**  
+  While Socket.IO integration is in place, further improvements can be made to optimize reconnections and handle edge cases.
+- **Optimistic UI Updates:**  
+  Deduplication of messages and better error handling for optimistic updates in the chat interface.
+- **Enhanced Tag Filtering:**  
+  More sophisticated tag-based recommendations and post filtering based on user behavior.
+- **UI/UX Enhancements:**  
+  Refining the user interface for mobile responsiveness and overall design polish.
+- **Security:**  
+  Additional security measures such as rate limiting, input sanitization, and enhanced authentication flows.
 
-- **POST /register** – Register a new user.
-- **POST /login** – Login and obtain a JWT.
-- **GET /profile** – Retrieve logged-in user’s profile.
-- **GET /profile/:userId** – Retrieve a specific user’s profile.
-
-### Messaging
-
-- **GET /conversations** – Retrieve user conversations.
-- **POST /conversations/init** – Initiate a new conversation.
-- **GET /conversations/:conversationId/chats** – Retrieve chats for a conversation.
-- **POST /conversations/:conversationId/chats** – Send a new message.
-- **GET /messages/:position** – Retrieve a post for the given position (boosted with preferred tags).
-
-### Tags
-
-- **GET /tags/top** – Fetch top N tags (e.g., `?n=10`).
-- **GET /tags/search** – Search tags by name (e.g., `?q=action`).
-
----
-
-## Front-End Components
-
-### Left Component
-
-- Displays user profile information and navigation links.
-- "Create Post" button focuses on the post input field on the Home page.
-- Uses React Router for navigation.
-
-### Middle Component
-
-- Houses the post creation area.
-- Contains a responsive textarea that auto-resizes and supports file attachments, tags, etc.
-
-### Right Component
-
-- Displays top tags as large, responsive bubbles.
-- Includes a search bar for real-time tag search.
-- Uses custom CSS classes (`right`, `messages`) to maintain layout consistency.
-
----
-
-## Real-Time Messaging
-
-- **Socket.IO Integration:**  
-  The MessagesComponent establishes a WebSocket connection to handle real-time message events.
-- **Joining/Leaving Rooms:**  
-  When a conversation is selected, the client joins the corresponding socket room to receive live updates.
-- **New Message Handling:**  
-  Incoming messages are appended to the conversation in real time.
-
----
-
-## Recommendation System
-
-### Boost Matching Posts
-
-- **Implementation:**  
-  The `/messages/:position` endpoint uses an aggregation pipeline to calculate a match score based on the number of tags a post shares with the user’s `preferredTags`. Posts are then sorted by this score (and creation date) to boost matching content.
-- **Customization:**  
-  You can further tweak the ranking logic by adding weights or combining with other signals (e.g., post popularity).
-
----
-
-## Tag Management
-
-- **User Preferences:**  
-  Users can specify `preferredTags` and `notPreferredTags` in their profile.
-- **Top & Search:**  
-  Dedicated endpoints and UI components allow users to view trending tags and search for tags in real time.
-- **Future Enhancements:**  
-  Plans include integrating tag-based notifications and personalized content filtering based on tag interactions.
-
----
-
-## Future Improvements
-
-Mintaka is a work in progress. Some planned enhancements include:
-
-- **Enhanced Recommendation Engine:**  
-  Incorporate hybrid methods and machine learning techniques to improve personalization.
-- **Expanded Messaging Features:**  
-  Richer message formatting, read receipts, and conversation threading.
-- **User Profile Enhancements:**  
-  Additional customization options, activity feeds, and social metrics.
-- **Improved Tag Analytics:**  
-  Better insights into tag usage, trending content, and user engagement.
-- **UI/UX Refinements:**  
-  Continued improvements in responsiveness, accessibility, and overall user experience.
+*Note: Rigel is a work in progress. Contributions, bug reports, and suggestions are welcome as we continue to improve the platform!*
 
 ---
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute:
+Contributions are welcome! Please follow these steps:
 
 1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes and push.
-4. Open a pull request with a detailed description of your changes.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -m 'Add some feature'`).
+4. Push to your branch (`git push origin feature/your-feature`).
+5. Open a pull request.
 
-Please ensure your code adheres to the project’s coding style and includes appropriate tests.
+Please ensure your code adheres to our coding guidelines and that all tests pass.
 
 ---
 
 ## License
 
 This project is licensed under the GNU General Public License v2.0 License. See the [LICENSE](LICENSE) file for details.
+
+---
 
 ## Authors
 
@@ -274,4 +297,5 @@ This project is licensed under the GNU General Public License v2.0 License. See 
 
 ---
 
-*Disclaimer: Mintaka is an experimental project. Some features are still under development, and the system will continue to evolve as new ideas and improvements are implemented.*
+Feel free to modify this README to suit your project's needs. Rigel is continuously evolving, so please refer to the latest documentation and commit messages for up-to-date information.
+
