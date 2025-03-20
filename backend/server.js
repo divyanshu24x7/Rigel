@@ -181,9 +181,17 @@ app.get("/messages/:position", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "Invalid position value." });
     }
 
-    // Filter out posts already seen by the user
+    // Retrieve the user's document to get notPreferredTags.
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    const notPreferredTags = user.notPreferredTags || [];
+
+    // Filter out posts already seen by the user and posts with any not-preferred tag.
     const unseenPosts = await Message.find({
-      [`seenBy.${userId}`]: { $exists: false }, // User's ID is not in the seenBy map
+      [`seenBy.${userId}`]: { $exists: false },
+      tags: { $nin: notPreferredTags }
     }).sort({ createdAt: -1 });
 
     if (position >= unseenPosts.length) {
@@ -194,7 +202,6 @@ app.get("/messages/:position", authenticateToken, async (req, res) => {
 
     // Get the post at the specified position
     const post = unseenPosts[position];
-
     res.status(200).json(post);
   } catch (error) {
     console.error("Error fetching post:", error);
@@ -203,6 +210,7 @@ app.get("/messages/:position", authenticateToken, async (req, res) => {
       .json({ message: "An error occurred while fetching the post." });
   }
 });
+
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
