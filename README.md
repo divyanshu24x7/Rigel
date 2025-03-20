@@ -1,7 +1,3 @@
-Below is an example of an extremely detailed README for your project. You can adjust or expand sections as your project evolves.
-
----
-
 # Mintaka – A Personalized Anime & Social Connection Platform
 
 **Mintaka** is a dynamic web application that combines personalized anime recommendations with social interactions. Built with modern web technologies, it allows users to discover anime, interact through messaging, and express their interests via posts—while using cutting‑edge recommendation and tag filtering systems. **Note:** This project is a work in progress, and more features and refinements will be added in the future.
